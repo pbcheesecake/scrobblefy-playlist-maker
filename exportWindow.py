@@ -130,7 +130,11 @@ class ExportWindow:
         #print(self.songList)
         self.iterator = 0
         self.itemsToAdd = []
-        self.encodeImage()
+        try: self.encodeImage()
+        except:
+            self.exportProgressLabel.configure(text = "Image format not accepted. Please pick a different one and try again.")
+            self.exportWindow.update()
+            return
         self.exportProgressLabel.grid(column = 0, row = 0, sticky = EW)
         if self.playlistNameVar.get() == "":
             self.exportProgressLabel.configure(text = "Please add a name for your playlist before continuing!")
@@ -279,7 +283,7 @@ class ExportWindow:
     def encodeImage(self):
         if len(self.imgPath):
             img = Image.open(self.imgPath)
-            if self.imgPath.endswith(".png"):
+            if self.imgPath.lower().endswith(".png"):
                 rgb_img = img.convert('RGB')
                 buffer = io.BytesIO()
                 rgb_img.save(buffer, format="JPEG", quality=95)
