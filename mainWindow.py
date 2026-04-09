@@ -210,16 +210,19 @@ class MainWindow:
         self.emptyMenus()
             
     def activateUserButtons(self):
-        self.root.attributes(topmost=False)
-        self.forgetAllFuncs()
-        for but in self.funcButtons:
-            but.state(['!disabled'])
-        self.activateSongButtons()
-        self.activatePlaylistButtons()
-        self.activateProgramButtons()
-        self.topDefaultTimeframeConstructor()
-        self.topTimeframeConstructor()
-        self.recentSongsConstructor()
+        try:
+            self.root.attributes(topmost=False)
+            self.forgetAllFuncs()
+            for but in self.funcButtons:
+                but.state(['!disabled'])
+            self.activateSongButtons()
+            self.activatePlaylistButtons()
+            self.activateProgramButtons()
+            self.topDefaultTimeframeConstructor()
+            self.topTimeframeConstructor()
+            self.recentSongsConstructor()
+        except TclError:
+            print("window die")
 
     def activateSongButtons(self):
         for but in self.songListButtons:
