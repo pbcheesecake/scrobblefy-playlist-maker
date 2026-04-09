@@ -93,8 +93,6 @@ class LoginWindow:
         self.verifyStatus = Label(spLoginFrame, text = "No user detected.")
         self.verifyStatus.grid(column = 0, row = 4, sticky = EW, columnspan = 5, pady=5)
         self.verifyStatus.configure(wraplength=self.loginWindow.winfo_width()-20)
-        autofill = Button(spLoginFrame, name = "autofill", text = "autofill", padding=5, command=self.autofill)
-        autofill.grid(column = 0, row = 5, sticky=EW, columnspan = 5)
 
         self.loginErrorLabel = Label(loginFrame, padding = 10, anchor = CENTER)
         self.loginErrorLabel.grid(column = 0, row = 4, sticky = NSEW, pady=5)
@@ -148,11 +146,6 @@ class LoginWindow:
         except spotipy.exceptions.SpotifyOauthError as e:
             self.verifyStatus.configure(text = "User not found. Please double check the validity of your inputs and try again. If this issue persists, check the help window.")
             self.spOK = False
-
-    def autofill(self):
-        self.clientIDVar.set("2bbbaa4dad76436baefa15e89f7c634b")
-        self.redirURIVar.set("http://127.0.0.1:1410/")
-        self.userToFetchVar.set("cstet23")
 
     def interceptClose(self):
         interceptWindow = Toplevel(self.loginWindow)
