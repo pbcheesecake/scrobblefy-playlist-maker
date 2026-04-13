@@ -84,7 +84,7 @@ class ExportWindow:
         self.playlistURLLabel = Label(playlistFrame, text = "Enter URL of existing playlist:")
         self.playlistURLInput = Entry(playlistFrame, textvariable=self.playlistURLVar)
 
-        self.playlistVisLabel = Label(playlistFrame, text = "Make playlist public or private?")
+        self.playlistVisLabel = Label(playlistFrame, text = "Make playlist public or private? (Note: this only affects visibility on profile)")
         self.playlistVisPublic = Radiobutton(playlistFrame, text = "Public", variable = self.playlistVisVar, value = True)
         self.playlistVisPrivate = Radiobutton(playlistFrame, text = "Private", variable = self.playlistVisVar, value = False)
         self.playlistVisLabel.grid(column = 0, row = 6, sticky = EW, columnspan = 4, pady=5)
@@ -181,6 +181,8 @@ class ExportWindow:
     def addSong(self):
         song = self.songList[self.iterator]
         formattedSong = song[2:]
+        if self.iterator == len(self.songList) - 1:
+            formattedSong = formattedSong[:-2]
         if len(formattedSong)>2:
             songArtist, songTitle = formattedSong.split(" - ", maxsplit = 1)
             self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")

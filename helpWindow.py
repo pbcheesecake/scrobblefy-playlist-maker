@@ -27,7 +27,7 @@ class HelpWindow:
         helpLabel.configure(wraplength=self.helpWindow.winfo_width()-20)
         helpNotebook = Notebook(helpFrame)
         helpNotebook.grid(column = 0, row = 1, sticky = NSEW)
-        helpButton = Button(helpFrame, name = "help", text = "More Help", padding=5)
+        helpButton = Button(helpFrame, name = "help", text = "More Help", padding=5, command=self.openSite)
         helpButton.grid(column = 0, row = 2, sticky=(EW))
 
         #loginFrame = ScrolledFrame(helpNotebook, padding = 5, relief = SOLID, width=self.helpWindow.winfo_width()-10)
@@ -97,6 +97,9 @@ class HelpWindow:
 
     def openSpotifyDev(self):
         webbrowser.open_new("https://developer.spotify.com/dashboard")
+
+    def openSite(self):
+        webbrowser.open_new("https://pbcheesecake.neocities.org/about/help/scrobblefy")
 
     def configLfmFrame(self, lfmFrame: Frame):
         lfmFrame.columnconfigure(0, weight = 1)
@@ -215,7 +218,7 @@ class HelpWindow:
 
         exportCreationHelpHeader = Label(exportFrame, text = "Creating a New Playlist", font=("bold"))
         exportCreationHelpHeader.grid(column = 0, row = 3, sticky = EW)
-        exportCreationHelpLabel = Label(exportFrame, text = "You have access to several aspects of playlist customization when creating a new playlist. These include playlist title, description (which will be autofilled if left blank), cover image, and whether the playlist should be public or private. Any newlines in the description will be converted to spaces.")
+        exportCreationHelpLabel = Label(exportFrame, text = "You have access to several aspects of playlist customization when creating a new playlist. These include playlist title, description (will be autofilled if left blank, any newlines in the description will be converted to spaces), cover image, and whether the playlist should be public or private. This only affects whether the playlist is visible on your public profile: sharing the link with others will still allow access. To make a playlist truly private, please use the Spotify interface, as the API cannot do this yet.")
         exportCreationHelpLabel.grid(column = 0, row = 4, sticky = EW)
         exportCreationHelpLabel.configure(wraplength=self.helpWindow.winfo_width()-35)
 

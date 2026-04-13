@@ -5,6 +5,7 @@ from tkinter.ttk import *
 from tkinter import ttk
 from pylast import PlayedTrack, TopItem, User
 from funcMenu import FuncMenu
+import os
 #import ttkbootstrap
 
 class MainWindow:
@@ -282,6 +283,7 @@ class MainWindow:
         self.root.geometry('1300x900')
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
+        self.root.protocol("WM_DELETE_WINDOW", self.interceptClose)
 
         self.style = ttk.Style()
         self.style.configure(style="G.TButton", foreground="green")
@@ -458,3 +460,8 @@ class MainWindow:
         
     def start(self):
         self.root.mainloop()
+
+    def interceptClose(self):
+        if(".cache" in os.listdir(".")):
+            os.remove(".cache")
+        self.root.destroy()
