@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
+from ttkbootstrap import *
+from ttkbootstrap.constants import *
 
 class DupeAskWindow:
     def __init__(self, allowDupes: BooleanVar, parent):

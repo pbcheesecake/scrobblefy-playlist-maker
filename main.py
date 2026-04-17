@@ -1,9 +1,10 @@
 import pylast
-from tkinter import *
-from tkinter.ttk import *
+#from tkinter import *
+#from tkinter.ttk import *
+from ttkbootstrap import *
 import spotipy
 from mainWindow import MainWindow
-#import ttkbootstrap as ttk
+
 
 if __name__ == "__main__":
     #initial auth stuff
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     sp: spotipy.Spotify | None = None
     user: pylast.User | None = None
 
-    root = Tk()
+    root = Window(themename="darkly")
     #TODO: STYLE EVERYTHING WITH TTKBOOTSTRAP WHAT THE FUCK
 
     mainWindow = MainWindow(root=root, sp=sp, network=network, user=user)

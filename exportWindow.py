@@ -2,6 +2,8 @@ import spotipy
 from tkinter import *
 from tkinter import filedialog
 from tkinter.ttk import *
+from ttkbootstrap import *
+from ttkbootstrap.constants import *
 import re
 from datetime import datetime, timezone
 import io

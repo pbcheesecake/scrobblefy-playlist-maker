@@ -1,8 +1,9 @@
 from pylast import TopItem, User
-from tkinter import *
-from tkinter import ttk
+from ttkbootstrap import *
+from ttkbootstrap.constants import *
 import re
 import time
+import datetime
 from calendar import timegm
 
 class FuncMenu:
@@ -20,6 +21,8 @@ class FuncMenu:
         formattedEndTime = time.strftime('%m/%d/%Y', time.gmtime(time.time()))
         timeStartList = formattedStartTime.split("/")
         timeEndList = formattedEndTime.split("/")
+        self.startDate = datetime.datetime.fromtimestamp(int(self.user.get_registered()))
+        self.endDate = datetime.datetime.now()
         self.startDateMonthVar = IntVar(value=int(timeStartList[0]))
         self.startDateDayVar = IntVar(value=int(timeStartList[1]))
         self.startDateYearVar = IntVar(value=int(timeStartList[2]))
@@ -118,19 +121,19 @@ class FuncMenu:
         check_year_wrapper = (self.root.register(self.check_year), '%P')
         
         songCountLabel = Label(self.parent, text="# of songs (use 0 for all):")
-        retrieveButton = ttk.Button(self.parent, text = "Retrieve", padding = 10)
-        widgetSeparator = ttk.Separator(self.parent, orient=HORIZONTAL)
+        retrieveButton = Button(self.parent, text = "Retrieve", padding = 10)
+        widgetSeparator = Separator(self.parent, orient=HORIZONTAL)
 
         if self.menu == "topDefaultTimeframe":
             timeframeLabel = Label(self.parent, text="Choose timeframe:")
             timeframeLabel.grid(row = 0, columnspan = 7)
 
-            tDToneweek = ttk.Radiobutton(self.parent, text = "7 Days", variable = self.timeframeVar, value = "7day")
-            tDTonemonth = ttk.Radiobutton(self.parent, text = "1 Month", variable = self.timeframeVar, value = "1month")
-            tDTthreemonth = ttk.Radiobutton(self.parent, text = "3 Months", variable = self.timeframeVar, value = "3month")
-            tDTsixmonth = ttk.Radiobutton(self.parent, text = "6 Months", variable = self.timeframeVar, value = "6month")
-            tDToneyear = ttk.Radiobutton(self.parent, text = "1 Year", variable = self.timeframeVar, value = "12month")
-            tDToverall = ttk.Radiobutton(self.parent, text = "All Time", variable = self.timeframeVar, value = "overall")
+            tDToneweek = Radiobutton(self.parent, text = "7 Days", variable = self.timeframeVar, value = "7day")
+            tDTonemonth = Radiobutton(self.parent, text = "1 Month", variable = self.timeframeVar, value = "1month")
+            tDTthreemonth = Radiobutton(self.parent, text = "3 Months", variable = self.timeframeVar, value = "3month")
+            tDTsixmonth = Radiobutton(self.parent, text = "6 Months", variable = self.timeframeVar, value = "6month")
+            tDToneyear = Radiobutton(self.parent, text = "1 Year", variable = self.timeframeVar, value = "12month")
+            tDToverall = Radiobutton(self.parent, text = "All Time", variable = self.timeframeVar, value = "overall")
             
             tDToneweek.grid(column = 0, row = 1, columnspan = 1)
             tDTonemonth.grid(column = 1, row = 1, columnspan = 1)
@@ -148,23 +151,27 @@ class FuncMenu:
             endDateLabel = Label(self.parent, text="End Date (MM/DD/YYYY):")
             endDateLabel.grid(column = 4, row = 0, columnspan = 3)
 
-            startDateMonth = ttk.Spinbox(self.parent, from_=1, to=12, textvariable=self.startDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
-            startDateDay = ttk.Spinbox(self.parent, from_=1, to=31, textvariable=self.startDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
-            startDateYear = ttk.Spinbox(self.parent, from_=0000, to=9999, textvariable=self.startDateYearVar, width=5, validatecommand=check_year_wrapper, wrap=True)
-            dateSeparator = ttk.Separator(self.parent, orient=VERTICAL)
-            endDateMonth = ttk.Spinbox(self.parent, from_=1, to=12, textvariable=self.endDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
-            endDateDay = ttk.Spinbox(self.parent, from_=1, to=31, textvariable=self.endDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
-            endDateYear = ttk.Spinbox(self.parent, from_=0000, to=9999, textvariable=self.endDateYearVar, width=5, validate='key', validatecommand=check_year_wrapper, wrap=True)
+            startDateSelector = DateEntry(self.parent, startdate=self.startDate)
+            #startDateMonth = Spinbox(self.parent, from_=1, to=12, textvariable=self.startDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
+            #startDateDay = Spinbox(self.parent, from_=1, to=31, textvariable=self.startDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
+            #startDateYear = Spinbox(self.parent, from_=0000, to=9999, textvariable=self.startDateYearVar, width=5, validatecommand=check_year_wrapper, wrap=True)
+            dateSeparator = Separator(self.parent, orient=VERTICAL)
+            endDateSelector = DateEntry(self.parent, startdate=self.endDate)
+            #endDateMonth = Spinbox(self.parent, from_=1, to=12, textvariable=self.endDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
+            #endDateDay = Spinbox(self.parent, from_=1, to=31, textvariable=self.endDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
+            #endDateYear = Spinbox(self.parent, from_=0000, to=9999, textvariable=self.endDateYearVar, width=5, validate='key', validatecommand=check_year_wrapper, wrap=True)
 
-            startDateMonth.grid(padx = 2, column = 0, row = 1, sticky=NSEW, columnspan = 1)
-            startDateDay.grid(padx = 2, column = 1, row = 1, sticky=NSEW, columnspan = 1)
-            startDateYear.grid(padx = 2, column = 2, row = 1, sticky=NSEW, columnspan = 1)
+            startDateSelector.grid(sticky = NSEW, column = 0, row = 1, columnspan = 3)
+            #startDateMonth.grid(padx = 2, column = 0, row = 1, sticky=NSEW, columnspan = 1)
+            #startDateDay.grid(padx = 2, column = 1, row = 1, sticky=NSEW, columnspan = 1)
+            #startDateYear.grid(padx = 2, column = 2, row = 1, sticky=NSEW, columnspan = 1)
             dateSeparator.grid(sticky = NS, column = 3, row = 0, rowspan = 2)
-            endDateMonth.grid(padx = 2, column = 4, row = 1, sticky=NSEW, columnspan = 1)
-            endDateDay.grid(padx = 2, column = 5, row = 1, sticky=NSEW, columnspan = 1)
-            endDateYear.grid(padx = 2, column = 6, row = 1, sticky=NSEW, columnspan = 1)
+            endDateSelector.grid(sticky = NSEW, column = 4, row = 1, columnspan = 3)
+            #endDateMonth.grid(padx = 2, column = 4, row = 1, sticky=NSEW, columnspan = 1)
+            #endDateDay.grid(padx = 2, column = 5, row = 1, sticky=NSEW, columnspan = 1)
+            #endDateYear.grid(padx = 2, column = 6, row = 1, sticky=NSEW, columnspan = 1)
 
-            self.dateErrorLabel = Label(self.parent, text="", fg="red")
+            self.dateErrorLabel = Label(self.parent, text="", bootstyle="danger")
 
             retrieveButton.bind('<Button-1>', self.getTopsFromDates)
 
@@ -175,6 +182,6 @@ class FuncMenu:
         
         widgetSeparator.grid(sticky = EW, columnspan = 7, pady = 5)
         songCountLabel.grid(sticky = EW, columnspan = 7)
-        songCountSpinbox = ttk.Spinbox(self.parent, from_=0, to=999, textvariable=self.songCountVar, validate='key', validatecommand=check_num_wrapper)
+        songCountSpinbox = Spinbox(self.parent, from_=0, to=999, textvariable=self.songCountVar, validate='key', validatecommand=check_num_wrapper)
         songCountSpinbox.grid(sticky = EW, columnspan = 7)
         retrieveButton.grid(columnspan = 7)

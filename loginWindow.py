@@ -1,8 +1,10 @@
 import pylast
 import spotipy
 from spotipy.oauth2 import SpotifyPKCE
-from tkinter import *
-from tkinter.ttk import *
+#from tkinter import *
+#from tkinter.ttk import *
+from ttkbootstrap import *
+from ttkbootstrap.constants import *
 import os
 
 class LoginWindow:
@@ -53,7 +55,7 @@ class LoginWindow:
 
         self.userToFetchLabel = Label(lastfmLoginFrame, text="Enter last.fm username:")
         self.userToFetch = Entry(lastfmLoginFrame, textvariable=self.userToFetchVar)
-        selectUserButton = Button(lastfmLoginFrame, text = "Select User", command=self.selectUser, style="G.TButton")
+        selectUserButton = Button(lastfmLoginFrame, text = "Select User", command=self.selectUser, bootstyle="success")
         self.userToFetchLabel.grid(sticky=NSEW, pady=5)
         self.userToFetch.grid(sticky=EW)
         selectUserButton.grid(sticky=NSEW)
@@ -88,7 +90,7 @@ class LoginWindow:
         redirURILabel.grid(column = 2, row = 1, sticky = EW, pady=5)
         redirURIInput.grid(column = 2, row = 2, sticky = EW)
 
-        verifyButton = Button(spLoginFrame, name = "verify", text = "Verify and Sign In with Spotify", padding=5, style="G.TButton", command=self.setSpotipyInfo)
+        verifyButton = Button(spLoginFrame, name = "verify", text = "Verify and Sign In with Spotify", padding=5, bootstyle="success", command=self.setSpotipyInfo)
         verifyButton.grid(column = 0, row = 3, sticky = EW, columnspan = 5)
         self.verifyStatus = Label(spLoginFrame, text = "No user detected.")
         self.verifyStatus.grid(column = 0, row = 4, sticky = EW, columnspan = 5, pady=5)
@@ -103,9 +105,9 @@ class LoginWindow:
         buttonFrame.columnconfigure(1, weight=5)
         buttonFrame.columnconfigure(2, weight=1)
 
-        exitProgramButton = Button(buttonFrame, name = "cancel", text = "Exit Program", padding=5, style="R.TButton", command=self.closeProgram)
-        helpButton = Button(buttonFrame, name = "help", text = "Help", padding=5, command=self.getHelp)
-        confirmLoginButton = Button(buttonFrame, name = "confirm", text = "Confirm and Sign In", padding=5, style="G.TButton", command=self.checkCreds)
+        exitProgramButton = Button(buttonFrame, name = "cancel", text = "Exit Program", padding=5, bootstyle="danger", command=self.closeProgram)
+        helpButton = Button(buttonFrame, name = "help", text = "Help", padding=5, bootstyle="info", command=self.getHelp)
+        confirmLoginButton = Button(buttonFrame, name = "confirm", text = "Confirm and Sign In", padding=5, bootstyle="success", command=self.checkCreds)
         exitProgramButton.grid(column = 0, row = 0, sticky = (S,EW))
         helpButton.grid(column = 1, row = 0, sticky = (S,EW))
         confirmLoginButton.grid(column = 2, row = 0, sticky = (S,EW))

@@ -2,7 +2,8 @@ import pylast
 import spotipy
 from tkinter import *
 from tkinter.ttk import *
-from tkinter import ttk
+from ttkbootstrap import *
+from ttkbootstrap.constants import *
 from pylast import PlayedTrack, TopItem, User
 from funcMenu import FuncMenu
 import os
@@ -222,8 +223,8 @@ class MainWindow:
             self.topDefaultTimeframeConstructor()
             self.topTimeframeConstructor()
             self.recentSongsConstructor()
-        except TclError:
-            print("window die")
+        except TclError as e:
+            print(f"window die: {e}")
 
     def activateSongButtons(self):
         for but in self.songListButtons:
@@ -277,17 +278,13 @@ class MainWindow:
         self.activateUserButtons()
 
     #the program
-    def __init__(self, root: Tk, sp: spotipy.Spotify | None, network: pylast.LastFMNetwork | None, user: pylast.User | None):
+    def __init__(self, root: Window, sp: spotipy.Spotify | None, network: pylast.LastFMNetwork | None, user: pylast.User | None):
         self.root = root
         self.root.title("Scrobblefy")
         self.root.geometry('1300x900')
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.interceptClose)
-
-        self.style = ttk.Style()
-        self.style.configure(style="G.TButton", foreground="green")
-        self.style.configure(style="R.TButton", foreground="red")
 
         self.user = user
         self.sp = sp
@@ -344,7 +341,7 @@ class MainWindow:
         allSongLabel.grid(column = 0, row = 0, sticky = NSEW)
         self.allSongListbox = Listbox(leftColumn, listvariable=self.allSongListVar, width = 80, height = 30, selectmode = EXTENDED)
         self.allSongListbox.grid(column = 0, row = 1, sticky = NSEW)
-        self.allSongListboxScrollbar = ttk.Scrollbar(leftColumn, orient=VERTICAL, command=self.allSongListbox.yview)
+        self.allSongListboxScrollbar = Scrollbar(leftColumn, orient=VERTICAL, command=self.allSongListbox.yview)
         self.allSongListboxScrollbar.grid(column = 1, row = 1, sticky=NS)
         self.allSongListbox.configure(yscrollcommand=self.allSongListboxScrollbar.set)
 
@@ -377,7 +374,7 @@ class MainWindow:
         self.playlistButtons.append(sortPlaylistAlphArtistButton)
         openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes)
         self.playlistButtons.append(openDupesButton)
-        exportPlaylistButton = Button(playlistButtonFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, style="G.TButton")
+        exportPlaylistButton = Button(playlistButtonFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, bootstyle="success")
         self.playlistButtons.append(exportPlaylistButton)
         for but in self.playlistButtons:
             but.grid(sticky = NSEW)
@@ -398,7 +395,7 @@ class MainWindow:
         playlistLabel.grid(column = 0, row = 0, sticky = NSEW)
         self.playlistListbox = Listbox(rightColumn, listvariable=self.playlistListVar, width = 80, height = 30, selectmode=EXTENDED)
         self.playlistListbox.grid(column = 0, row = 1)
-        self.playlistListboxScrollbar = ttk.Scrollbar(rightColumn, orient=VERTICAL, command=self.playlistListbox.yview)
+        self.playlistListboxScrollbar = Scrollbar(rightColumn, orient=VERTICAL, command=self.playlistListbox.yview)
         self.playlistListboxScrollbar.grid(column = 1, row = 1, sticky=NS)
         self.playlistListbox.configure(yscrollcommand=self.playlistListboxScrollbar.set)
 
@@ -414,7 +411,7 @@ class MainWindow:
         topDefaultButton = Button(funcFrame, text = "Get Top Songs from Default Timeframe", command=self.topDefault, padding=2)
         topTimeframeButton = Button(funcFrame, text = "Get Top Songs from Custom Timeframe", command=self.topTimeframe, padding=2)
         recentSongsButton = Button(funcFrame, text = "Get Recent Songs", command=self.recentSongs, padding=2)
-        clearListButton = Button(funcFrame, text = "Clear Both Lists", command=self.clearSongs, padding=2, style="R.TButton")
+        clearListButton = Button(funcFrame, text = "Clear Both Lists", command=self.clearSongs, padding=2, bootstyle="danger")
         self.funcButtons.append(topDefaultButton)
         self.funcButtons.append(topTimeframeButton)
         self.funcButtons.append(recentSongsButton)
