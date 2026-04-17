@@ -5,9 +5,10 @@ import re
 import time
 import datetime
 from calendar import timegm
+from pylast import WSError
 
 class FuncMenu:
-    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList, allSongListVar: StringVar, weightedList):
+    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[TopItem], allSongListVar: StringVar, weightedList: list[TopItem]):
         self.parent = parent
         self.root = root
         self.user = user
@@ -34,14 +35,8 @@ class FuncMenu:
     def check_num(self, newval):
         return re.match('^[0-9]*$', newval) is not None and len(newval) <= 3
     
-    def check_month(self, newval):
-        return re.match('^[0-9]*$', newval) is not None and len(newval) <= 2
-
-    def check_day(self, newval):
-        return re.match('^[0-9]*$', newval) is not None and len(newval) <= 2
-
-    def check_year(self, newval):
-        return re.match('^[0-9]*$', newval) is not None and len(newval) <= 4
+    def check_date(self, newval):
+        return datetime.datetime.fromtimestamp(int(self.user.get_registered())) < newval < datetime.datetime.now()
     
     def removeLeadingZeros(self, num):
         strnum = str(num)
@@ -54,15 +49,14 @@ class FuncMenu:
     def clearSongs(self):
         self.allSongListVar.set([])
 
-    def parseTime(self, month: int, day: int, year: int, start: bool):
-        if start: utc_time = time.strptime(str(year)+"-"+str(month)+"-"+str(day)+"T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
-        else: utc_time = time.strptime(str(year)+"-"+str(month)+"-"+str(day)+"T23:59:59.999Z", "%Y-%m-%dT%H:%M:%S.%fZ")
-        return timegm(utc_time)
+    def parseTime(self, date: datetime):
+        return int(datetime.datetime.timestamp(date))
     
     def getTops(self, event):
         #default options: overall, 7day, 1month, 3month, 6month, 12month
         songList = []
         self.allSongList.clear()
+        self.weightedList.clear()
         if self.songCountVar.get() == 0:
             tops = self.user.get_top_tracks(period = self.timeframeVar.get())
         else:
@@ -73,35 +67,45 @@ class FuncMenu:
             songList.append(str(song[0])+": "+str(song[1])+" listens")
             self.allSongList.append(song)
             self.weightedList.append(song)
+        print(self.allSongList)
         self.allSongListVar.set(songList)
 
     def getTopsFromDates(self, event):
+        self.dateErrorLabel.grid_remove()
         songList = []
         self.allSongList.clear()
+        self.weightedList.clear()
         try:
-            startTime = self.parseTime(self.startDateMonthVar.get(), self.startDateDayVar.get(), self.startDateYearVar.get(), True)
-            endTime = self.parseTime(self.endDateMonthVar.get(), self.endDateDayVar.get(), self.endDateYearVar.get(), False)
-            if self.songCountVar.get() == 0:
-                tops = self.user.get_weekly_track_charts(startTime, endTime)
+            startTime = self.parseTime(self.startDateSelector.get_date())
+            endTime = self.parseTime(self.endDateSelector.get_date())
+            if(self.check_date(self.startDateSelector.get_date()) and self.check_date(self.endDateSelector.get_date())):
+                if self.songCountVar.get() == 0:
+                    tops = self.user.get_weekly_track_charts(startTime, endTime)
+                else:
+                    self.songCountVar.set(self.removeLeadingZeros(self.songCountVar.get()))
+                    tops = self.user.get_weekly_track_charts(startTime, endTime)
+                    while len(tops)>self.songCountVar.get():
+                        tops.pop()
+                self.clearSongs()
+                for song in tops:
+                    songList.append(str(song[0])+": "+str(song[1])+" listens")
+                    self.allSongList.append(song)
+                    self.weightedList.append(song)
+                self.allSongListVar.set(songList)
+                self.dateErrorLabel.grid_forget()
             else:
-                self.songCountVar.set(self.removeLeadingZeros(self.songCountVar.get()))
-                tops = self.user.get_weekly_track_charts(startTime, endTime)
-                while len(tops)>self.songCountVar.get():
-                    tops.pop()
-            self.clearSongs()
-            for song in tops:
-                songList.append(str(song[0])+": "+str(song[1])+" listens")
-                self.allSongList.append(song)
-                self.weightedList.append(song)
-            self.allSongListVar.set(songList)
-            self.dateErrorLabel.grid_forget()
+                raise ValueError
         except ValueError:
             Label.configure(self.dateErrorLabel, text="Dates out of range! Enter valid dates.")
+            self.dateErrorLabel.grid(column = 0, row = 2, columnspan = 7)
+        except WSError:
+            Label.configure(self.dateErrorLabel, text="Last.fm error, try again in a couple seconds.")
             self.dateErrorLabel.grid(column = 0, row = 2, columnspan = 7)
 
     def getRecents(self, event):
         songList = []
         self.allSongList.clear()
+        self.weightedList.clear()
         if self.songCountVar.get() == 0:
             recents = self.user.get_recent_tracks()
         else:
@@ -113,12 +117,12 @@ class FuncMenu:
             self.allSongList.append(topItemSong)
             self.weightedList.append(topItemSong)
         self.allSongListVar.set(songList)
+        print(self.allSongList)
+
+        # TODO: sorts aren't working, get em fixed
         
     def setup(self):
         check_num_wrapper = (self.root.register(self.check_num), '%P')
-        check_month_wrapper = (self.root.register(self.check_month), '%P')
-        check_day_wrapper = (self.root.register(self.check_day), '%P')
-        check_year_wrapper = (self.root.register(self.check_year), '%P')
         
         songCountLabel = Label(self.parent, text="# of songs (use 0 for all):")
         retrieveButton = Button(self.parent, text = "Retrieve", padding = 10)
@@ -151,25 +155,13 @@ class FuncMenu:
             endDateLabel = Label(self.parent, text="End Date (MM/DD/YYYY):")
             endDateLabel.grid(column = 4, row = 0, columnspan = 3)
 
-            startDateSelector = DateEntry(self.parent, startdate=self.startDate)
-            #startDateMonth = Spinbox(self.parent, from_=1, to=12, textvariable=self.startDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
-            #startDateDay = Spinbox(self.parent, from_=1, to=31, textvariable=self.startDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
-            #startDateYear = Spinbox(self.parent, from_=0000, to=9999, textvariable=self.startDateYearVar, width=5, validatecommand=check_year_wrapper, wrap=True)
+            self.startDateSelector = DateEntry(master=self.parent, dateformat="%m/%d/%y", startdate=self.startDate)
             dateSeparator = Separator(self.parent, orient=VERTICAL)
-            endDateSelector = DateEntry(self.parent, startdate=self.endDate)
-            #endDateMonth = Spinbox(self.parent, from_=1, to=12, textvariable=self.endDateMonthVar, width=3, validate='key', validatecommand=check_month_wrapper, wrap=True)
-            #endDateDay = Spinbox(self.parent, from_=1, to=31, textvariable=self.endDateDayVar, width=3, validate='key', validatecommand=check_day_wrapper, wrap=True)
-            #endDateYear = Spinbox(self.parent, from_=0000, to=9999, textvariable=self.endDateYearVar, width=5, validate='key', validatecommand=check_year_wrapper, wrap=True)
+            self.endDateSelector = DateEntry(master=self.parent, dateformat="%m/%d/%y", startdate=self.endDate)
 
-            startDateSelector.grid(sticky = NSEW, column = 0, row = 1, columnspan = 3)
-            #startDateMonth.grid(padx = 2, column = 0, row = 1, sticky=NSEW, columnspan = 1)
-            #startDateDay.grid(padx = 2, column = 1, row = 1, sticky=NSEW, columnspan = 1)
-            #startDateYear.grid(padx = 2, column = 2, row = 1, sticky=NSEW, columnspan = 1)
+            self.startDateSelector.grid(sticky = NSEW, column = 0, row = 1, columnspan = 3)
             dateSeparator.grid(sticky = NS, column = 3, row = 0, rowspan = 2)
-            endDateSelector.grid(sticky = NSEW, column = 4, row = 1, columnspan = 3)
-            #endDateMonth.grid(padx = 2, column = 4, row = 1, sticky=NSEW, columnspan = 1)
-            #endDateDay.grid(padx = 2, column = 5, row = 1, sticky=NSEW, columnspan = 1)
-            #endDateYear.grid(padx = 2, column = 6, row = 1, sticky=NSEW, columnspan = 1)
+            self.endDateSelector.grid(sticky = NSEW, column = 4, row = 1, columnspan = 3)
 
             self.dateErrorLabel = Label(self.parent, text="", bootstyle="danger")
 
