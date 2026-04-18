@@ -165,11 +165,17 @@ class MainWindow:
     def weightedSort(self):
         tempList = []
         if self.allSongList == self.weightedList: self.allSongList.reverse()
-        else: self.allSongList = list.copy(self.weightedList)
+        else: 
+            self.allSongList.clear()
+            for song in self.weightedList:
+                self.allSongList.append(song)
         for song in self.allSongList:
             tempList.append(str(song[0])+": "+str(song[1])+" listens")
         self.allSongListVar.set(tempList)
         self.allSongListbox.select_clear(0, len(self.allSongList))
+    
+    def getList(self):
+        print(self.allSongList)
 
     def openDupes(self):
         self.dupeCheck = True
@@ -356,6 +362,8 @@ class MainWindow:
         self.songListButtons.append(sortSongsAlphArtistButton)
         weightedSortButton = Button(songListButtonFrame, text = "Sort Songs by Listens", command=lambda: self.weightedSort())
         self.songListButtons.append(weightedSortButton)
+        printListButton = Button(songListButtonFrame, text = "Print List", command=lambda: self.getList())
+        self.songListButtons.append(printListButton)
         for but in self.songListButtons:
             but.grid(sticky = NSEW)
             but.state(['disabled'])

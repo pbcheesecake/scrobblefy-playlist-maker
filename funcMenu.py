@@ -67,7 +67,6 @@ class FuncMenu:
             songList.append(str(song[0])+": "+str(song[1])+" listens")
             self.allSongList.append(song)
             self.weightedList.append(song)
-        print(self.allSongList)
         self.allSongListVar.set(songList)
 
     def getTopsFromDates(self, event):
@@ -117,9 +116,6 @@ class FuncMenu:
             self.allSongList.append(topItemSong)
             self.weightedList.append(topItemSong)
         self.allSongListVar.set(songList)
-        print(self.allSongList)
-
-        # TODO: sorts aren't working, get em fixed
         
     def setup(self):
         check_num_wrapper = (self.root.register(self.check_num), '%P')
