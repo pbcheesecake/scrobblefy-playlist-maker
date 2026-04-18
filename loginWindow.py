@@ -12,14 +12,14 @@ class LoginWindow:
         self.parent = parent
         self.scope = "playlist-modify-private,playlist-modify-public,playlist-read-private,playlist-read-collaborative,ugc-image-upload"
         self.loginWindow = Toplevel(parent.root)
-        self.loginWindow.geometry("450x525")
+        self.loginWindow.geometry("500x550")
         self.loginWindow.title("Login to Last.fm and Spotify")
         self.loginWindow.wait_visibility()
-        #self.loginWindow.grab_set()
         self.loginWindow.columnconfigure(0, weight=1)
         self.loginWindow.rowconfigure(0, weight=1)
         self.loginWindow.resizable(False, False)
         self.loginWindow.protocol("WM_DELETE_WINDOW", self.interceptClose)
+        self.loginWindow.place_window_center()
 
         defaultUser = ""
         defaultClientID = ""

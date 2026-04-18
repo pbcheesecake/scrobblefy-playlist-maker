@@ -4,7 +4,7 @@ import pylast
 from ttkbootstrap import *
 import spotipy
 from mainWindow import MainWindow
-
+import tkinter.font as tkFont
 
 if __name__ == "__main__":
     #initial auth stuff
@@ -24,7 +24,10 @@ if __name__ == "__main__":
     sp: spotipy.Spotify | None = None
     user: pylast.User | None = None
 
-    root = Window(themename="darkly")
+    
+    root = Window(themename="scrobblefy")
+    default_font = tkFont.nametofont("TkDefaultFont")
+    default_font.configure(size=10)
     #TODO: STYLE EVERYTHING WITH TTKBOOTSTRAP WHAT THE FUCK
 
     mainWindow = MainWindow(root=root, sp=sp, network=network, user=user)

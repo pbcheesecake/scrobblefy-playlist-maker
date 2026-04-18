@@ -86,6 +86,7 @@ class MainWindow:
         for song in self.playlistList:
             plLVTemp.append(song.item)
         self.playlistListVar.set(plLVTemp)
+        self.playlistListbox.select_clear(0, len(self.playlistList))
 
     def moveSongsUp(self):
         plLVTemp = []
@@ -287,10 +288,11 @@ class MainWindow:
     def __init__(self, root: Window, sp: spotipy.Spotify | None, network: pylast.LastFMNetwork | None, user: pylast.User | None):
         self.root = root
         self.root.title("Scrobblefy")
-        self.root.geometry('1300x900')
+        self.root.geometry('1400x1000')
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.interceptClose)
+        self.root.place_window_center()
 
         self.user = user
         self.sp = sp
@@ -354,7 +356,7 @@ class MainWindow:
         #center column with buttons
         songListButtonFrame = Labelframe(buttonColumn, text="Results List Options:")
         songListButtonFrame.grid(sticky=(N,EW))
-        addSongsButton = Button(songListButtonFrame, text = "Add Song(s) to Playlist", command=self.addSongs)
+        addSongsButton = Button(songListButtonFrame, text = "Add Song(s) to Playlist", command=self.addSongs, bootstyle="success")
         self.songListButtons.append(addSongsButton)
         sortSongsAlphTitleButton = Button(songListButtonFrame, text = "Sort Songs by Title", command=lambda: self.sortSongsAlphTitle(self.allSongList, "allSongList"))
         self.songListButtons.append(sortSongsAlphTitleButton)
@@ -362,40 +364,38 @@ class MainWindow:
         self.songListButtons.append(sortSongsAlphArtistButton)
         weightedSortButton = Button(songListButtonFrame, text = "Sort Songs by Listens", command=lambda: self.weightedSort())
         self.songListButtons.append(weightedSortButton)
-        printListButton = Button(songListButtonFrame, text = "Print List", command=lambda: self.getList())
-        self.songListButtons.append(printListButton)
         for but in self.songListButtons:
-            but.grid(sticky = NSEW)
+            but.grid(sticky = NSEW, pady = 2)
             but.state(['disabled'])
 
         playlistButtonFrame = Labelframe(buttonColumn, text="Playlist Options:")
         playlistButtonFrame.grid(column = 0, row = 1, sticky=(N,EW))
-        removeSongsButton = Button(playlistButtonFrame, text = "Remove Song(s) from Playlist", command=self.removeSongs)
+        removeSongsButton = Button(playlistButtonFrame, text = "Remove Song(s) from Playlist", command=self.removeSongs, bootstyle="danger")
         self.playlistButtons.append(removeSongsButton)
-        moveSongsUpButton = Button(playlistButtonFrame, text = "Move Song(s) Up", command=self.moveSongsUp)
+        moveSongsUpButton = Button(playlistButtonFrame, text = "Move Song(s) Up", command=self.moveSongsUp, bootstyle="secondary")
         self.playlistButtons.append(moveSongsUpButton)
-        moveSongsDownButton = Button(playlistButtonFrame, text = "Move Song(s) Down", command=self.moveSongsDown)
+        moveSongsDownButton = Button(playlistButtonFrame, text = "Move Song(s) Down", command=self.moveSongsDown, bootstyle="secondary")
         self.playlistButtons.append(moveSongsDownButton)
         sortPlaylistAlphTitleButton = Button(playlistButtonFrame, text = "Sort Songs by Title", command=lambda: self.sortSongsAlphTitle(self.playlistList, "playlistList"))
         self.playlistButtons.append(sortPlaylistAlphTitleButton)
         sortPlaylistAlphArtistButton = Button(playlistButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.playlistList, "playlistList"))
         self.playlistButtons.append(sortPlaylistAlphArtistButton)
-        openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes)
+        openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes, bootstyle="warning") # turn this into a checkbox
         self.playlistButtons.append(openDupesButton)
         exportPlaylistButton = Button(playlistButtonFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, bootstyle="success")
         self.playlistButtons.append(exportPlaylistButton)
         for but in self.playlistButtons:
-            but.grid(sticky = NSEW)
+            but.grid(sticky = NSEW, pady = 2)
             but.state(['disabled'])
 
         programButtonFrame = Labelframe(buttonColumn, text = "Program Options")
         programButtonFrame.grid(column = 0, row = 2, sticky = (N,EW))
         backToLoginButton = Button(programButtonFrame, text = "Return to Login Screen", command=self.createLogin)
         self.programButtons.append(backToLoginButton)
-        programHelpButton = Button(programButtonFrame, text = "Open Help Window", command=self.openHelp)
+        programHelpButton = Button(programButtonFrame, text = "Open Help Window", command=self.openHelp, bootstyle="warning")
         self.programButtons.append(programHelpButton)
         for but in self.programButtons:
-            but.grid(sticky = NSEW)
+            but.grid(sticky = NSEW, pady = 2)
             but.state(['disabled'])
 
         #right column
@@ -426,7 +426,7 @@ class MainWindow:
         self.funcButtons.append(clearListButton)
         for butTup in enumerate(self.funcButtons):
             but = butTup[1]
-            but.grid(column = 0, row = butTup[0]*2, sticky=(N, EW))
+            but.grid(column = 0, row = butTup[0]*2, sticky=(N, EW), pady = 2)
             but.state(['disabled'])
 
         self.funcMenus = []
