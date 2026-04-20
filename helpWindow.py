@@ -9,7 +9,7 @@ class HelpWindow:
     def __init__(self, parent):
         self.parent = parent
         self.helpWindow = Toplevel(parent.root)
-        self.helpWindow.geometry("500x500")
+        self.helpWindow.geometry(f'{int(parent.root.winfo_screenwidth()*.25)}x{int(parent.root.winfo_screenheight()*.4)}')
         self.helpWindow.title("Program Help")
         self.helpWindow.wait_visibility()
         self.helpWindow.grab_set()
@@ -63,7 +63,7 @@ class HelpWindow:
         loginFrame.rowconfigure(8, weight = 4)
         loginFrame.rowconfigure(9, weight = 1)
 
-        loginGeneralHelpHeader = Label(loginFrame, text = "General", font=("bold"))
+        loginGeneralHelpHeader = Label(loginFrame, text = "General", font=("Lexend Medium", 14, "bold"))
         loginGeneralHelpHeader.grid(column = 0, row = 0, pady=5, sticky = EW)
         loginGeneralHelpLabel = Label(loginFrame, text = "To use this program, you'll need both a Last.fm account to pull listening data from and a Spotify Premium account. (The Last.fm account doesn't have to be yours!)")
         loginGeneralHelpLabel.grid(column = 0, row = 1, pady=5, sticky = EW)
@@ -72,7 +72,7 @@ class HelpWindow:
         loginSep1 = Separator(loginFrame, orient=HORIZONTAL)
         loginSep1.grid(column = 0, row = 2, pady=5, sticky = EW)
 
-        loginLfmHelpHeader = Label(loginFrame, text = "Last.fm", font=("bold"))
+        loginLfmHelpHeader = Label(loginFrame, text = "Last.fm", font=("Lexend Medium", 14, "bold"))
         loginLfmHelpHeader.grid(column = 0, row = 3, pady=5, sticky = EW)
         loginLfmHelpLabel = Label(loginFrame, text = "To access Last.fm listening data, all you need is the username attached to the account. If you don't have a Last.fm account and would like to create one, click below to get signed up.")
         loginLfmHelpLabel.grid(column = 0, row = 4, pady=5, sticky = EW)
@@ -83,7 +83,7 @@ class HelpWindow:
         loginSep2 = Separator(loginFrame, orient=HORIZONTAL)
         loginSep2.grid(column = 0, row = 6, sticky = EW)
 
-        loginSpotifyHelpHeader = Label(loginFrame, text = "Spotify", font=("bold"))
+        loginSpotifyHelpHeader = Label(loginFrame, text = "Spotify", font=("Lexend Medium", 14, "bold"))
         loginSpotifyHelpHeader.grid(column = 0, row = 7, pady=5, sticky = EW)
         loginSpotifyHelpLabel = Label(loginFrame, text = "In order to automatically create playlists with Spotify, you'll need Spotify Premium as well as an API application. Your Client ID will be generated for you after filling out your application, and you should use 'http://127.0.0.1:1410/' or another similar local IP address with an open port as your redirect address. To go to the Developer Dashboard to create an API app, click the Spotify Dev button below. For more help creating an API application, click the More Help button at the bottom of the window.")
         loginSpotifyHelpLabel.grid(column = 0, row = 8, pady=5, sticky = EW)
@@ -115,7 +115,7 @@ class HelpWindow:
         lfmFrame.rowconfigure(10, weight = 4)
         lfmFrame.rowconfigure(11, weight = 1)
 
-        lfmGeneralHelpHeader = Label(lfmFrame, text = "General", font=("bold"))
+        lfmGeneralHelpHeader = Label(lfmFrame, text = "General", font=("Lexend Medium", 14, "bold"))
         lfmGeneralHelpHeader.grid(column = 0, row = 0, pady=5, sticky = EW)
         lfmGeneralHelpLabel = Label(lfmFrame, text = "All Last.fm requests have a maximum limit of 1000 items. Leaving the # field at 0 will retrieve as many items as possible. However, this size of request will take time, and the program may appear unresponsive for some time while this request processes.")
         lfmGeneralHelpLabel.grid(column = 0, row = 1, pady=5, sticky = EW)
@@ -124,7 +124,7 @@ class HelpWindow:
         lfmSep1 = Separator(lfmFrame, orient=HORIZONTAL)
         lfmSep1.grid(column = 0, row = 2, pady=5, sticky = EW)
 
-        lfmTSDTHelpHeader = Label(lfmFrame, text = "Get Top Songs from Default Timeframe", font=("bold"))
+        lfmTSDTHelpHeader = Label(lfmFrame, text = "Get Top Songs from Default Timeframe", font=("Lexend Medium", 14, "bold"))
         lfmTSDTHelpHeader.grid(column = 0, row = 3, pady=5, sticky = EW)
         lfmTSDTHelpLabel = Label(lfmFrame, text = "This function retrieves your top songs from one of several default timeframes. These options include 1 week, 1 month, 3 months, 6 months, 1 year, and the entire lifetime of your Last.fm account.")
         lfmTSDTHelpLabel.grid(column = 0, row = 4, pady=5, sticky = EW)
@@ -133,16 +133,16 @@ class HelpWindow:
         lfmSep2 = Separator(lfmFrame, orient=HORIZONTAL)
         lfmSep2.grid(column = 0, row = 5, pady=5, sticky = EW)
 
-        lfmTSCTHelpHeader = Label(lfmFrame, text = "Get Top Songs from Custom Timeframe", font=("bold"))
+        lfmTSCTHelpHeader = Label(lfmFrame, text = "Get Top Songs from Custom Timeframe", font=("Lexend Medium", 14, "bold"))
         lfmTSCTHelpHeader.grid(column = 0, row = 6, pady=5, sticky = EW)
-        lfmTSCTHelpLabel = Label(lfmFrame, text = "This function retrieves your top songs between two specified dates. Dates are in MM/DD/YYYY format.")
+        lfmTSCTHelpLabel = Label(lfmFrame, text = "This function retrieves your top songs between two specified dates. Dates are in MM/DD/YY format.")
         lfmTSCTHelpLabel.grid(column = 0, row = 7, pady=5, sticky = EW)
         lfmTSCTHelpLabel.configure(wraplength=self.helpWindow.winfo_width()-45)
 
         lfmSep3 = Separator(lfmFrame, orient=HORIZONTAL)
         lfmSep3.grid(column = 0, row = 8, pady=5, sticky = EW)
 
-        lfmGRSHelpHeader = Label(lfmFrame, text = "Get Recent Songs", font=("bold"))
+        lfmGRSHelpHeader = Label(lfmFrame, text = "Get Recent Songs", font=("Lexend Medium", 14, "bold"))
         lfmGRSHelpHeader.grid(column = 0, row = 9, pady=5, sticky = EW)
         lfmGRSHelpLabel = Label(lfmFrame, text = "This function retrieves songs you've listened to most recently, not including any tracks currently playing.")
         lfmGRSHelpLabel.grid(column = 0, row = 10, pady=5, sticky = EW)
@@ -163,7 +163,7 @@ class HelpWindow:
         plistFrame.rowconfigure(10, weight = 4)
         plistFrame.rowconfigure(11, weight = 1)
 
-        plistGeneralHelpHeader = Label(plistFrame, text = "General", font=("bold"))
+        plistGeneralHelpHeader = Label(plistFrame, text = "General", font=("Lexend Medium", 14, "bold"))
         plistGeneralHelpHeader.grid(column = 0, row = 0, pady=5, sticky = EW)
         plistGeneralHelpLabel = Label(plistFrame, text = "Once a Last.fm request is complete, songs will populate the left 'Results' box. The songs can be sorted, selected, and added to a playlist by using one of the 'Results List Options' buttons in the center.")
         plistGeneralHelpLabel.grid(column = 0, row = 1, pady=5, sticky = EW)
@@ -172,7 +172,7 @@ class HelpWindow:
         plistSep1 = Separator(plistFrame, orient=HORIZONTAL)
         plistSep1.grid(column = 0, row = 2, pady=5, sticky = EW)
 
-        plistSelectionHelpHeader = Label(plistFrame, text = "On Song Selection", font=("bold"))
+        plistSelectionHelpHeader = Label(plistFrame, text = "On Song Selection", font=("Lexend Medium", 14, "bold"))
         plistSelectionHelpHeader.grid(column = 0, row = 3, pady=5, sticky = EW)
         plistSelectionHelpLabel = Label(plistFrame, text = "Songs must be selected in the 'Results' box to be added to a playlist. This can be done in several ways. To select a song, just click on the song you want to select! However, you can also click and drag the mouse or Shift-click two songs to select all songs between the two locations, Ctrl-click (and drag if desired!) to start another selection without erasing current selections, or use Ctrl-A to select all songs. All of these selection options can also be performed in the 'Playlist' box on the right once songs have been added to it.")
         plistSelectionHelpLabel.grid(column = 0, row = 4, pady=5, sticky = EW)
@@ -181,7 +181,7 @@ class HelpWindow:
         plistSep2 = Separator(plistFrame, orient=HORIZONTAL)
         plistSep2.grid(column = 0, row = 5, pady=5, sticky = EW)
 
-        plistAdditionHelpHeader = Label(plistFrame, text = "Playlist Management", font=("bold"))
+        plistAdditionHelpHeader = Label(plistFrame, text = "Playlist Management", font=("Lexend Medium", 14, "bold"))
         plistAdditionHelpHeader.grid(column = 0, row = 6, pady=5, sticky = EW)
         plistAdditionHelpLabel = Label(plistFrame, text = "After the desired songs have been selected, just click 'Add Song(s) to Playlist' in the center column to add them to the playlist! From here, there are several options, including removing undesired songs (must be selected in playlist), moving songs around within the playlist, sorting the playlist, and exporting to Spotify. All of these can be done using the buttons in 'Playlist Options' in the center column.")
         plistAdditionHelpLabel.grid(column = 0, row = 7, pady=5, sticky = EW)
@@ -190,7 +190,7 @@ class HelpWindow:
         plistSep3 = Separator(plistFrame, orient=HORIZONTAL)
         plistSep3.grid(column = 0, row = 8, pady=5, sticky = EW)
 
-        plistDuplicateHelpHeader = Label(plistFrame, text = "On Duplicates", font=("bold"))
+        plistDuplicateHelpHeader = Label(plistFrame, text = "On Duplicates", font=("Lexend Medium", 14, "bold"))
         plistDuplicateHelpHeader.grid(column = 0, row = 9, pady=5, sticky = EW)
         plistDuplicateHelpLabel = Label(plistFrame, text = "When adding new songs to a playlist, it is possible to add a song that is already in the playlist. In this case, a window will appear prompting you to select whether or not you'd like to allow duplicates. If you change your mind, click the 'Open Duplicate Option Menu' in the center column to switch your choice.")
         plistDuplicateHelpLabel.grid(column = 0, row = 10, pady=5, sticky = EW)
@@ -207,7 +207,7 @@ class HelpWindow:
         exportFrame.rowconfigure(6, weight = 2)
         exportFrame.rowconfigure(7, weight = 4)
 
-        exportGeneralHelpHeader = Label(exportFrame, text = "General", font=("bold"))
+        exportGeneralHelpHeader = Label(exportFrame, text = "General", font=("Lexend Medium", 14, "bold"))
         exportGeneralHelpHeader.grid(column = 0, row = 0, pady=5, sticky = EW)
         exportGeneralHelpLabel = Label(exportFrame, text = "When preparing to export a playlist to Spotify, you can choose whether to create a new playlist or add to an existing playlist. You must have editing access to an existing playlist in order to add songs to it. After choosing a type of playlist and adding the requisite information, just click the 'Confirm and Export' button to start playlist creation!")
         exportGeneralHelpLabel.grid(column = 0, row = 1, pady=5, sticky = EW)
@@ -216,7 +216,7 @@ class HelpWindow:
         exportSep1 = Separator(exportFrame, orient=HORIZONTAL)
         exportSep1.grid(column = 0, row = 2, pady=5, sticky = EW)
 
-        exportCreationHelpHeader = Label(exportFrame, text = "Creating a New Playlist", font=("bold"))
+        exportCreationHelpHeader = Label(exportFrame, text = "Creating a New Playlist", font=("Lexend Medium", 14, "bold"))
         exportCreationHelpHeader.grid(column = 0, row = 3, pady=5, sticky = EW)
         exportCreationHelpLabel = Label(exportFrame, text = "You have access to several aspects of playlist customization when creating a new playlist. These include playlist title, description (will be autofilled if left blank, any newlines in the description will be converted to spaces), cover image, and whether the playlist should be public or private. This only affects whether the playlist is visible on your public profile: sharing the link with others will still allow access. To make a playlist truly private, please use the Spotify interface, as the API cannot do this yet.")
         exportCreationHelpLabel.grid(column = 0, row = 4, pady=5, sticky = EW)
@@ -225,7 +225,7 @@ class HelpWindow:
         exportSep2 = Separator(exportFrame, orient=HORIZONTAL)
         exportSep2.grid(column = 0, row = 5, pady=5, sticky = EW)
 
-        exportImageHelpHeader = Label(exportFrame, text = "On Playlist Images", font=("bold"))
+        exportImageHelpHeader = Label(exportFrame, text = "On Playlist Images", font=("Lexend Medium", 14, "bold"))
         exportImageHelpHeader.grid(column = 0, row = 6, pady=5, sticky = EW)
         exportImageHelpLabel = Label(exportFrame, text = "If no playlist cover image is selected, a default cover will be auto-generated by Spotify. Choosing to upload an image will replace this default cover, but there are limits. Spotify allows playlist covers to be no larger than 4MB, and accepts TIFF, PNG, and JPEG files. However, due to the restrictions of this program, PNG images will be auto-converted to JPEG when selected and compressed to 256KB. Images larger than 256KB can be selected, but they may not retain their quality. If this is an issue for you, the playlist image can always be customized more freely through the official Spotify interface.")
         exportImageHelpLabel.grid(column = 0, row = 7, pady=5, sticky = EW)
@@ -237,7 +237,7 @@ class HelpWindow:
         moreFrame.rowconfigure(1, weight = 4)
         moreFrame.rowconfigure(2, weight = 1)
 
-        moreHelpHeader = Label(moreFrame, text = "Anything else?", font=("bold"))
+        moreHelpHeader = Label(moreFrame, text = "Anything else?", font=("Lexend Medium", 14, "bold"))
         moreHelpHeader.grid(column = 0, row = 0, pady=5, sticky = EW)
         moreHelpLabel = Label(moreFrame, text = "If there's anything else that doesn't make sense or that you feel needs better explanation, please don't hesitate to reach out! My email is phoebecheesecake@gmail.com. I'll try to get back to you or otherwise update things, but I have no clue on how vigilant I'll be on keeping everything up to date. I'd also love to hear any other feedback or recommendations you may have :) Thanks so much for reading all this and using this program!!!")
         moreHelpLabel.grid(column = 0, row = 1, pady=5, sticky = EW)

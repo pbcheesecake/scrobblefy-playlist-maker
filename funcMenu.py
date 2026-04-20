@@ -145,10 +145,10 @@ class FuncMenu:
             retrieveButton.bind('<Button-1>', self.getTops)
 
         elif self.menu == "topCustomTimeframe":
-            startDateLabel = Label(self.parent, text="Start Date (MM/DD/YYYY):")
+            startDateLabel = Label(self.parent, text="Start Date (MM/DD/YY):")
             startDateLabel.grid(column = 0, row = 0, columnspan = 3)
 
-            endDateLabel = Label(self.parent, text="End Date (MM/DD/YYYY):")
+            endDateLabel = Label(self.parent, text="End Date (MM/DD/YY):")
             endDateLabel.grid(column = 4, row = 0, columnspan = 3)
 
             self.startDateSelector = DateEntry(master=self.parent, dateformat="%m/%d/%y", startdate=self.startDate)

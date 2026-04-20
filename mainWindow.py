@@ -202,6 +202,7 @@ class MainWindow:
             but.state(['disabled'])
         for but in self.programButtons:
             but.state(['disabled'])
+        self.dupeCheckbox.state(['disabled'])
 
     def emptyMenus(self):
         self.tdtMenu = None
@@ -240,6 +241,7 @@ class MainWindow:
     def activatePlaylistButtons(self):
         for but in self.playlistButtons:
             but.state(['!disabled'])
+        self.dupeCheckbox.state(['!disabled'])
 
     def activateProgramButtons(self):
         for but in self.programButtons:
@@ -288,7 +290,7 @@ class MainWindow:
     def __init__(self, root: Window, sp: spotipy.Spotify | None, network: pylast.LastFMNetwork | None, user: pylast.User | None):
         self.root = root
         self.root.title("Scrobblefy")
-        self.root.geometry('1400x1000')
+        self.root.geometry(f'{int(root.winfo_screenwidth()*.75)}x{int(root.winfo_screenheight()*.8)}')
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.interceptClose)
@@ -322,18 +324,18 @@ class MainWindow:
         baseFrame.columnconfigure(1, weight=1)
         baseFrame.columnconfigure(2, weight=3)
         baseFrame.rowconfigure(0, weight=1)
-        baseFrame.rowconfigure(1, weight=2)
+        baseFrame.rowconfigure(1, weight=1)
         baseFrame.grid(sticky=NSEW)
 
         leftColumn = Frame(baseFrame, padding = 10)
         leftColumn.grid(row = 0, column = 0, sticky=NW)
-        leftColumn.columnconfigure(0, weight=1, minsize=200)
+        leftColumn.columnconfigure(0, weight=1)
         leftColumn.columnconfigure(1, weight=1)
         leftColumn.rowconfigure(1, weight=1)
 
         buttonColumn = Frame(baseFrame, padding = 10)
         buttonColumn.grid(row = 0, column = 1, sticky = NS)
-        buttonColumn.columnconfigure(0, weight=1, minsize=200)
+        buttonColumn.columnconfigure(0, weight=1)
         buttonColumn.rowconfigure(0, weight=1)
         buttonColumn.rowconfigure(1, weight=1)
         buttonColumn.rowconfigure(2, weight=1)
@@ -347,7 +349,7 @@ class MainWindow:
         #left column
         allSongLabel = Label(leftColumn, text="Last.fm Results")
         allSongLabel.grid(column = 0, row = 0, sticky = NSEW)
-        self.allSongListbox = Listbox(leftColumn, listvariable=self.allSongListVar, width = 80, height = 30, selectmode = EXTENDED)
+        self.allSongListbox = Listbox(leftColumn, listvariable=self.allSongListVar, width = 80, height = 25, selectmode = EXTENDED)
         self.allSongListbox.grid(column = 0, row = 1, sticky = NSEW)
         self.allSongListboxScrollbar = Scrollbar(leftColumn, orient=VERTICAL, command=self.allSongListbox.yview)
         self.allSongListboxScrollbar.grid(column = 1, row = 1, sticky=NS)
@@ -369,6 +371,8 @@ class MainWindow:
             but.state(['disabled'])
 
         playlistButtonFrame = Labelframe(buttonColumn, text="Playlist Options:")
+        playlistButtonFrame.columnconfigure(0, weight=1)
+        playlistButtonFrame.columnconfigure(1, weight=1)
         playlistButtonFrame.grid(column = 0, row = 1, sticky=(N,EW))
         removeSongsButton = Button(playlistButtonFrame, text = "Remove Song(s) from Playlist", command=self.removeSongs, bootstyle="danger")
         self.playlistButtons.append(removeSongsButton)
@@ -380,13 +384,22 @@ class MainWindow:
         self.playlistButtons.append(sortPlaylistAlphTitleButton)
         sortPlaylistAlphArtistButton = Button(playlistButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.playlistList, "playlistList"))
         self.playlistButtons.append(sortPlaylistAlphArtistButton)
-        openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes, bootstyle="warning") # turn this into a checkbox
-        self.playlistButtons.append(openDupesButton)
+        #openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes, bootstyle="warning") # turn this into a checkbox
+        #self.playlistButtons.append(openDupesButton)
+        dupeCheckboxLabel = Label(playlistButtonFrame, text = "Allow duplicates?")
+        self.dupeCheckbox = Checkbutton(playlistButtonFrame, variable=self.allowDupes, padding = 7)
+        dupeCheckboxLabel.grid(row = 5, column = 0, sticky = (E, NS), pady = 2)
+        self.dupeCheckbox.grid(row = 5, column = 1, sticky = (W, NS), pady = 2)
+        self.dupeCheckbox.state(['disabled'])
         exportPlaylistButton = Button(playlistButtonFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, bootstyle="success")
         self.playlistButtons.append(exportPlaylistButton)
-        for but in self.playlistButtons:
-            but.grid(sticky = NSEW, pady = 2)
+        for butTup in enumerate(self.playlistButtons):
+            but = butTup[1]
+            rowLoc = butTup[0]
+            if rowLoc > 4: rowLoc += 1
+            but.grid(column = 0, row = rowLoc, sticky=(N, EW), pady = 2, columnspan = 2)
             but.state(['disabled'])
+        
 
         programButtonFrame = Labelframe(buttonColumn, text = "Program Options")
         programButtonFrame.grid(column = 0, row = 2, sticky = (N,EW))
@@ -401,7 +414,7 @@ class MainWindow:
         #right column
         playlistLabel = Label(rightColumn, text="Playlist")
         playlistLabel.grid(column = 0, row = 0, sticky = NSEW)
-        self.playlistListbox = Listbox(rightColumn, listvariable=self.playlistListVar, width = 80, height = 30, selectmode=EXTENDED)
+        self.playlistListbox = Listbox(rightColumn, listvariable=self.playlistListVar, width = 80, height = 25, selectmode=EXTENDED)
         self.playlistListbox.grid(column = 0, row = 1)
         self.playlistListboxScrollbar = Scrollbar(rightColumn, orient=VERTICAL, command=self.playlistListbox.yview)
         self.playlistListboxScrollbar.grid(column = 1, row = 1, sticky=NS)

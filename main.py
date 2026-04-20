@@ -5,6 +5,10 @@ from ttkbootstrap import *
 import spotipy
 from mainWindow import MainWindow
 import tkinter.font as tkFont
+import pyglet
+pyglet.options['win32_gdi_font'] = True
+from ctypes import windll
+windll.shcore.SetProcessDpiAwareness(2)
 
 if __name__ == "__main__":
     #initial auth stuff
@@ -26,8 +30,13 @@ if __name__ == "__main__":
 
     
     root = Window(themename="scrobblefy")
+
+    pyglet.font.add_file("Lexend-Medium.ttf")
+    pyglet.font.add_file("Lexend-Light.ttf")
     default_font = tkFont.nametofont("TkDefaultFont")
-    default_font.configure(size=10)
+    text_font = tkFont.nametofont("TkTextFont")
+    default_font.config(family="Lexend Medium", size=11)
+    text_font.config(family="Lexend Light", size=11)
     #TODO: STYLE EVERYTHING WITH TTKBOOTSTRAP WHAT THE FUCK
 
     mainWindow = MainWindow(root=root, sp=sp, network=network, user=user)

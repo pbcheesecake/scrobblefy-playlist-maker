@@ -12,7 +12,7 @@ class LoginWindow:
         self.parent = parent
         self.scope = "playlist-modify-private,playlist-modify-public,playlist-read-private,playlist-read-collaborative,ugc-image-upload"
         self.loginWindow = Toplevel(parent.root)
-        self.loginWindow.geometry("500x550")
+        self.loginWindow.geometry(f'{int(parent.root.winfo_screenwidth()*.2)}x{int(parent.root.winfo_screenheight()*.5)}')
         self.loginWindow.title("Login to Last.fm and Spotify")
         self.loginWindow.wait_visibility()
         self.loginWindow.columnconfigure(0, weight=1)
