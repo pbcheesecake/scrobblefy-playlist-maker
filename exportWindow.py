@@ -1,7 +1,7 @@
 import spotipy
-from tkinter import *
+#from tkinter import *
+# #from tkinter.ttk import *
 from tkinter import filedialog
-from tkinter.ttk import *
 from ttkbootstrap import *
 from ttkbootstrap.constants import *
 import re
@@ -30,6 +30,7 @@ class ExportWindow:
         self.exportWindow.title("Export to Spotify")
         self.exportWindow.wait_visibility()
         self.exportWindow.grab_set()
+        self.exportWindow.place_window_center()
         self.exportWindow.columnconfigure(0, weight=1)
         self.exportWindow.rowconfigure(0, weight=1)
         self.exportWindow.resizable(False, False)
@@ -146,19 +147,6 @@ class ExportWindow:
         self.playlistURLLabel.grid_remove()
         self.playlistURLInput.grid_remove()
 
-        """self.playlistNewNameLabel.grid(column = 0, row = 2, sticky = EW, columnspan = 4, pady=5)
-        self.playlistNewNameInput.grid(column = 0, row = 3, sticky = EW, columnspan = 4, pady=5)
-        self.playlistDescLabel.grid(column = 0, row = 4, sticky = EW, pady=5)
-        self.playlistDescText.grid(column = 0, row = 5, sticky = EW, columnspan = 4, pady=5)
-        self.playlistDescScrollbar.grid(column = 3, row = 5, sticky = (E, NS), pady=5)
-        self.playlistVisLabel.grid(column = 0, row = 6, sticky = EW, columnspan = 4)
-        self.playlistVisPublic.grid(column = 0, row = 7, sticky = W)
-        self.playlistVisPrivate.grid(column = 1, row = 7, sticky = W)
-        self.playlistImgHeader.grid(column = 0, row = 8, sticky = EW, columnspan=4, pady=5)
-        self.playlistImgFrame.grid(column = 0, row = 9, sticky = W)
-        self.playlistImgLabel.grid(column = 0, row = 0, sticky = NSEW)
-        self.playlistImgAddButton.grid(column = 0, row = 10, sticky = W, pady=5)"""
-
         self.playlistNewNameLabel.grid()
         self.playlistNewNameInput.grid()
         self.playlistDescLabel.grid()
@@ -244,10 +232,6 @@ class ExportWindow:
             self.exportProgressLabel.configure(text = "Almost done! Adding songs to playlist...")
             self.exportWindow.update()
             self.exportWindow.after(ms = 2000, func = self.addItems)
-            self.closeTime = 3
-            self.exportProgressLabel.configure(text = "Playlist creation complete! Closing window in "+str(self.closeTime)+" seconds.")
-            self.exportProgressbar.grid_remove()
-            self.exportWindow.after(ms = 1000, func = self.updateCloseTime)
 
     def addItems(self):
         errOutput = io.StringIO()
@@ -255,6 +239,10 @@ class ExportWindow:
             try: 
                 for i in range(0, len(self.itemsToAdd), 100):
                     self.sp.playlist_add_items(playlist_id=self.playlist_url, items=self.itemsToAdd[i:i+100])
+                self.closeTime = 3
+                self.exportProgressLabel.configure(text = "Playlist creation complete! Closing window in "+str(self.closeTime)+" seconds.")
+                self.exportProgressbar.grid_remove()
+                self.exportWindow.after(ms = 1000, func = self.updateCloseTime)
             except spotipy.exceptions.SpotifyException as e:
                 if e.http_status == 429:
                     waitTime = errOutput.getvalue().replace("Your application has reached a rate/request limit. Retry will occur after: ", "").split()[0]

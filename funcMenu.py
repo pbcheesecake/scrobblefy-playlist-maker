@@ -1,11 +1,9 @@
-from pylast import TopItem, User
+from pylast import TopItem, User, WSError
 from ttkbootstrap import *
 from ttkbootstrap.constants import *
 import re
 import time
 import datetime
-from calendar import timegm
-from pylast import WSError
 
 class FuncMenu:
     def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[TopItem], allSongListVar: StringVar, weightedList: list[TopItem]):
@@ -64,7 +62,8 @@ class FuncMenu:
             tops = self.user.get_top_tracks(period = self.timeframeVar.get(), limit = self.songCountVar.get())
         self.clearSongs()
         for song in tops:
-            songList.append(str(song[0])+": "+str(song[1])+" listens")
+            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+            songList.append(formattedSong+": "+str(song[1])+" listens")
             self.allSongList.append(song)
             self.weightedList.append(song)
         self.allSongListVar.set(songList)
@@ -87,7 +86,11 @@ class FuncMenu:
                         tops.pop()
                 self.clearSongs()
                 for song in tops:
-                    songList.append(str(song[0])+": "+str(song[1])+" listens")
+                    #TODO: account for when album is None, otherwise only show album title
+                    # also make sorting work with album titles
+                    # also uhhhhh you're cool haha
+                    formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+                    songList.append(formattedSong+": "+str(song[1])+" listens")
                     self.allSongList.append(song)
                     self.weightedList.append(song)
                 self.allSongListVar.set(songList)
@@ -111,7 +114,8 @@ class FuncMenu:
             recents=self.user.get_recent_tracks(self.songCountVar.get())
         self.clearSongs()
         for song in recents:
-            songList.append(str(song[0]))
+            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+            songList.append(formattedSong)
             topItemSong = TopItem(song.track, 1)
             self.allSongList.append(topItemSong)
             self.weightedList.append(topItemSong)

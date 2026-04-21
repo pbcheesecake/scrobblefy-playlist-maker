@@ -28,7 +28,6 @@ if __name__ == "__main__":
     sp: spotipy.Spotify | None = None
     user: pylast.User | None = None
 
-    
     root = Window(themename="scrobblefy")
 
     pyglet.font.add_file("Lexend-Medium.ttf")
@@ -37,7 +36,6 @@ if __name__ == "__main__":
     text_font = tkFont.nametofont("TkTextFont")
     default_font.config(family="Lexend Medium", size=11)
     text_font.config(family="Lexend Light", size=11)
-    #TODO: STYLE EVERYTHING WITH TTKBOOTSTRAP WHAT THE FUCK
 
     mainWindow = MainWindow(root=root, sp=sp, network=network, user=user)
     mainWindow.start()
