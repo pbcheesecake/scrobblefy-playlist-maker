@@ -1,4 +1,5 @@
 import spotipy
+from pylast import TopItem
 #from tkinter import *
 # #from tkinter.ttk import *
 from tkinter import filedialog
@@ -12,9 +13,11 @@ from PIL import Image, ImageTk
 import base64
 
 class ExportWindow:
-    def __init__(self, songList: str, parent):
+    def __init__(self, songList: tuple[TopItem, str], parent):
         self.root: Tk = parent.root
         self.sp: spotipy.Spotify = parent.sp
+
+        #TODO: switch export window to be based on song tuples instead of list of strings
 
         self.songList = re.split("',|\",", songList)
         self.playlistNameVar = StringVar()
@@ -183,7 +186,7 @@ class ExportWindow:
         if self.iterator == len(self.songList) - 1:
             formattedSong = formattedSong[:-2]
         if len(formattedSong)>2:
-            songArtist, songTitle = formattedSong.split(" - ", maxsplit = 1)
+            songArtist, songTitle, songAlbum = formattedSong.split(": ", maxsplit = 1)
             self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")
             errOutput = io.StringIO()
             with redirect_stderr(errOutput):

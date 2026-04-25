@@ -12,7 +12,7 @@ import os
 class MainWindow:
     #functions
     ##old funcs
-    def printTracks(self, tracks: list[PlayedTrack] | list[TopItem], lim: int | None = None):
+    """def printTracks(self, tracks: list[PlayedTrack] | list[TopItem], lim: int | None = None):
         if isinstance(tracks[0], PlayedTrack):
             self.printRecents(tracks)
         else:
@@ -35,7 +35,7 @@ class MainWindow:
             i = 0
             while i < lim and i < len(tracks):
                 print(str(tracks[i][0]) + ": " + str(tracks[i][1]) + " listens")
-                i+=1
+                i+=1"""
 
     ##button onpress funcs
     def topDefault(self):
@@ -63,6 +63,15 @@ class MainWindow:
         self.allSongListVar.set([])
         self.playlistListVar.set([])
 
+    def formatSong(self, songTuple: tuple[TopItem, str]):
+        formattedSong = (f"{str(songTuple[0].item).replace(" - ", ": ", 1)}")
+        songAlbum = songTuple[0].item.get_album()
+        if songAlbum:
+            songAlbum = str(songAlbum)
+            songAlbum = songAlbum.split(" - ", 1)[1].replace(" [Explicit]", "")
+            formattedSong += (f" [{songAlbum}]")
+        return formattedSong
+
     def addSongs(self):
         plLVTemp = []
         songIndices = self.allSongListbox.curselection()
@@ -73,8 +82,9 @@ class MainWindow:
                 self.playlistList.append(self.allSongList[songInd])
             if self.allSongList[songInd] not in self.playlistList:
                 self.playlistList.append(self.allSongList[songInd])
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
+        for songTuple in self.playlistList:
+            formattedSong = self.formatSong(songTuple)
+            plLVTemp.append(formattedSong)
         self.playlistListVar.set(plLVTemp)
 
     def removeSongs(self):
@@ -83,8 +93,9 @@ class MainWindow:
         songIndices.reverse()
         for songInd in songIndices:
             self.playlistList.pop(songInd)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
+        for songTuple in self.playlistList:
+            formattedSong = self.formatSong(songTuple)
+            plLVTemp.append(formattedSong)
         self.playlistListVar.set(plLVTemp)
         self.playlistListbox.select_clear(0, len(self.playlistList))
 
@@ -104,8 +115,9 @@ class MainWindow:
             else:
                 self.playlistList[songInd], self.playlistList[idxTarget] = self.playlistList[idxTarget], self.playlistList[songInd]
             newCursorList.append(idxTarget)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
+        for songTuple in self.playlistList:
+            formattedSong = self.formatSong(songTuple)
+            plLVTemp.append(formattedSong)
         self.playlistListVar.set(plLVTemp)
         self.playlistListbox.select_clear(0, len(self.playlistList))
         for target in newCursorList:
@@ -128,20 +140,22 @@ class MainWindow:
             else:
                 self.playlistList[songInd], self.playlistList[idxTarget] = self.playlistList[idxTarget], self.playlistList[songInd]
             newCursorList.append(idxTarget)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
+        for songTuple in self.playlistList:
+            formattedSong = self.formatSong(songTuple)
+            plLVTemp.append(formattedSong)
         self.playlistListVar.set(plLVTemp)
         self.playlistListbox.select_clear(0, len(self.playlistList))
         for target in newCursorList:
             self.playlistListbox.select_set(target)
 
-    def sortSongsAlphTitle(self, list: list[TopItem], type: str):
+    def sortSongsAlphTitle(self, list: list[tuple[TopItem, str]], type: str):
         tempList = []
-        if sorted(list, key=lambda song : song.item.title.lower()) == list:
-            list.sort(key=lambda song : song.item.title.lower(), reverse=True)
-        else: list.sort(key=lambda song : song.item.title.lower())
-        for song in list:
-            tempList.append(str(song.item))
+        if sorted(list, key=lambda song : song[0].item.title.lower()) == list:
+            list.sort(key=lambda song : song[0].item.title.lower(), reverse=True)
+        else: list.sort(key=lambda song : song[0].item.title.lower())
+        for songTuple in list:
+            formattedSong = self.formatSong(songTuple)
+            tempList.append(formattedSong)
         if type == "allSongList":
             self.allSongListVar.set(tempList)
             self.allSongListbox.select_clear(0, len(self.allSongList))
@@ -149,19 +163,39 @@ class MainWindow:
             self.playlistListVar.set(tempList)
             self.playlistListbox.select_clear(0, len(self.playlistList))
 
-    def sortSongsAlphArtist(self, list: list[TopItem], type: str):
+    def sortSongsAlphArtist(self, list: list[tuple[TopItem, str]], type: str):
         tempList = []
-        if sorted(list, key=lambda song : str(song.item.artist).lower()) == list:
-            list.sort(key=lambda song : str(song.item.artist).lower(), reverse=True)
-        else: list.sort(key=lambda song : str(song.item.artist).lower())
-        for song in list:
-            tempList.append(str(song.item))
+        if sorted(list, key=lambda song : str(song[0].item.artist).lower()) == list:
+            list.sort(key=lambda song : str(song[0].item.artist).lower(), reverse=True)
+        else: list.sort(key=lambda song : str(song[0].item.artist).lower())
+        for songTuple in list:
+            formattedSong = self.formatSong(songTuple)
+            tempList.append(formattedSong)
         if type == "allSongList":
             self.allSongListVar.set(tempList)
             self.allSongListbox.select_clear(0, len(self.allSongList))
         elif type == "playlistList":
             self.playlistListVar.set(tempList)
             self.playlistListbox.select_clear(0, len(self.playlistList))
+
+    def sortSongsAlphAlbum(self, list: list[tuple[TopItem, str]], type: str):
+        tempList = []
+        if sorted(list, key=lambda song : self.albumSortPrep(song)) == list:
+            list.sort(key=lambda song : self.albumSortPrep(song), reverse=True)
+        else: list.sort(key=lambda song : self.albumSortPrep(song))
+        for songTuple in list:
+            formattedSong = self.formatSong(songTuple)
+            tempList.append(formattedSong)
+        if type == "allSongList":
+            self.allSongListVar.set(tempList)
+            self.allSongListbox.select_clear(0, len(self.allSongList))
+        elif type == "playlistList":
+            self.playlistListVar.set(tempList)
+            self.playlistListbox.select_clear(0, len(self.playlistList))
+
+    def albumSortPrep(self, song: tuple[TopItem, str]):
+        if song[1]: return str(str(song[1]).lower())
+        else: return ""
 
     def weightedSort(self):
         tempList = []
@@ -170,8 +204,9 @@ class MainWindow:
             self.allSongList.clear()
             for song in self.weightedList:
                 self.allSongList.append(song)
-        for song in self.allSongList:
-            tempList.append(str(song[0])+": "+str(song[1])+" listens")
+        for songTuple in self.allSongList:
+            formattedSong = self.formatSong(songTuple)
+            tempList.append(f"{formattedSong}: {str(songTuple[0][1])} listens")
         self.allSongListVar.set(tempList)
         self.allSongListbox.select_clear(0, len(self.allSongList))
     
@@ -271,7 +306,7 @@ class MainWindow:
             self.root.wait_window(self.loginWindow.loginWindow)
         elif winType == "export":
             from exportWindow import ExportWindow
-            self.exportWindow = ExportWindow(parent=self, songList=self.playlistListVar.get())
+            self.exportWindow = ExportWindow(parent=self, songList=self.playlistList)
             self.root.wait_window(self.exportWindow.exportWindow)
         elif winType == "dupeAsk":
             from dupeAskWindow import DupeAskWindow
@@ -364,6 +399,8 @@ class MainWindow:
         self.songListButtons.append(sortSongsAlphTitleButton)
         sortSongsAlphArtistButton = Button(songListButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.allSongList, "allSongList"))
         self.songListButtons.append(sortSongsAlphArtistButton)
+        sortSongsAlphAlbumButton = Button(songListButtonFrame, text = "Sort Songs by Album", command=lambda: self.sortSongsAlphAlbum(self.allSongList, "allSongList"))
+        self.songListButtons.append(sortSongsAlphAlbumButton)
         weightedSortButton = Button(songListButtonFrame, text = "Sort Songs by Listens", command=lambda: self.weightedSort())
         self.songListButtons.append(weightedSortButton)
         for but in self.songListButtons:
@@ -384,8 +421,8 @@ class MainWindow:
         self.playlistButtons.append(sortPlaylistAlphTitleButton)
         sortPlaylistAlphArtistButton = Button(playlistButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.playlistList, "playlistList"))
         self.playlistButtons.append(sortPlaylistAlphArtistButton)
-        #openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes, bootstyle="warning") # turn this into a checkbox
-        #self.playlistButtons.append(openDupesButton)
+        sortPlaylistAlphAlbumButton = Button(playlistButtonFrame, text = "Sort Songs by Album", command=lambda: self.sortSongsAlphAlbum(self.playlistList, "playlistList"))
+        self.playlistButtons.append(sortPlaylistAlphAlbumButton)
         dupeCheckboxLabel = Label(playlistButtonFrame, text = "Allow duplicates?")
         self.dupeCheckbox = Checkbutton(playlistButtonFrame, variable=self.allowDupes, padding = 7)
         dupeCheckboxLabel.grid(row = 5, column = 0, sticky = (E, NS), pady = 2)

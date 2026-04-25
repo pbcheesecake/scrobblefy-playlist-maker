@@ -6,7 +6,7 @@ import time
 import datetime
 
 class FuncMenu:
-    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[TopItem], allSongListVar: StringVar, weightedList: list[TopItem]):
+    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[tuple[TopItem, str]], allSongListVar: StringVar, weightedList: list[tuple[TopItem, str]]):
         self.parent = parent
         self.root = root
         self.user = user
@@ -50,6 +50,25 @@ class FuncMenu:
     def parseTime(self, date: datetime):
         return int(datetime.datetime.timestamp(date))
     
+    def addSongToLists(self, song: TopItem, songList: list[str], listens: bool):
+        formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)}")
+        songAlbum = song[0].get_album()
+        if songAlbum:
+            songAlbum = str(songAlbum)
+            songAlbum = songAlbum.split(" - ", 1)[1].replace(" [Explicit]", "")
+            formattedSong += (f" [{songAlbum}]")
+        if listens: 
+            songList.append(formattedSong+": "+str(song[1])+" listens")
+            songTuple = (song, songAlbum)
+            self.allSongList.append(songTuple)
+            self.weightedList.append(songTuple)
+        else: 
+            songList.append(formattedSong)
+            topItemSong = TopItem(song.track, 1)
+            songTuple = (topItemSong, songAlbum)
+            self.allSongList.append(songTuple)
+            self.weightedList.append(songTuple)
+    
     def getTops(self, event):
         #default options: overall, 7day, 1month, 3month, 6month, 12month
         songList = []
@@ -62,10 +81,7 @@ class FuncMenu:
             tops = self.user.get_top_tracks(period = self.timeframeVar.get(), limit = self.songCountVar.get())
         self.clearSongs()
         for song in tops:
-            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
-            songList.append(formattedSong+": "+str(song[1])+" listens")
-            self.allSongList.append(song)
-            self.weightedList.append(song)
+            self.addSongToLists(song, songList, True)
         self.allSongListVar.set(songList)
 
     def getTopsFromDates(self, event):
@@ -86,13 +102,7 @@ class FuncMenu:
                         tops.pop()
                 self.clearSongs()
                 for song in tops:
-                    #TODO: account for when album is None, otherwise only show album title
-                    # also make sorting work with album titles
-                    # also uhhhhh you're cool haha
-                    formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
-                    songList.append(formattedSong+": "+str(song[1])+" listens")
-                    self.allSongList.append(song)
-                    self.weightedList.append(song)
+                    self.addSongToLists(song, songList, True)
                 self.allSongListVar.set(songList)
                 self.dateErrorLabel.grid_forget()
             else:
@@ -114,11 +124,7 @@ class FuncMenu:
             recents=self.user.get_recent_tracks(self.songCountVar.get())
         self.clearSongs()
         for song in recents:
-            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
-            songList.append(formattedSong)
-            topItemSong = TopItem(song.track, 1)
-            self.allSongList.append(topItemSong)
-            self.weightedList.append(topItemSong)
+            self.addSongToLists(song, songList, False)
         self.allSongListVar.set(songList)
         
     def setup(self):
