@@ -19,12 +19,12 @@ class ExportWindow:
 
         #TODO: switch export window to be based on song tuples instead of list of strings
 
-        self.songList = re.split("',|\",", songList)
+        self.songList = songList
         self.playlistNameVar = StringVar()
         self.playlistVisVar = BooleanVar(value=False)
         self.playlistNewVar = BooleanVar(value=True)
         self.playlistURLVar = StringVar()
-        self.imgPath: str
+        self.imgPath: str = ""
         self.encodedImgString: str
         self.pic: ImageTk.PhotoImage
 
@@ -111,6 +111,7 @@ class ExportWindow:
         exportProgressFrame.rowconfigure(1, weight = 1)
 
         self.exportProgressLabel = Label(exportProgressFrame, text = "Creating playlist...")
+        self.exportProgressLabel.configure(wraplength=self.exportWindow.winfo_width()-20)
         self.exportProgressbar = Progressbar(exportProgressFrame, orient=HORIZONTAL, length=300, mode='determinate', maximum = len(self.songList), bootstyle="success")
 
         buttonFrame = Frame(exportFrame)
@@ -181,15 +182,34 @@ class ExportWindow:
         self.playlistURLInput.grid(column = 0, row = 3, sticky = EW, columnspan = 4)
 
     def addSong(self):
+        #re.split("',|\",", songList)
         song = self.songList[self.iterator]
-        formattedSong = song[2:]
-        if self.iterator == len(self.songList) - 1:
-            formattedSong = formattedSong[:-2]
-        if len(formattedSong)>2:
-            songArtist, songTitle, songAlbum = formattedSong.split(": ", maxsplit = 1)
-            self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")
+        if song:
+            songArtist, songTitle = str(song[0][0]).split(" - ", maxsplit = 1)
+            songAlbum = song[1]
+            if songAlbum: self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist} on {songAlbum}...")
+            else: self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")
             errOutput = io.StringIO()
             with redirect_stderr(errOutput):
+                try: 
+                    if songAlbum: searchRes = dict(self.sp.search(q = f"track:\"{songTitle}\" artist:\"{songArtist}\" album:\"{songAlbum}\"", type="track", limit = 1))
+                    else: searchRes = dict(self.sp.search(q = f"track:\"{songTitle}\" artist:\"{songArtist}\"", type="track", limit = 1))
+                except spotipy.exceptions.SpotifyException as e:
+                    if e.http_status == 429:
+                        waitTime = int(errOutput.getvalue().replace("Your application has reached a rate/request limit. Retry will occur after: ", "").split()[0])
+                        waitHr = waitTime // 3600
+                        waitMin = waitTime % 3600 // 60
+                        waitSec = waitTime % 60
+                        self.exportProgressLabel.configure(text = f"Spotify rate limit reached. Please try again in {waitHr} hours, {waitMin} minutes and {waitSec} seconds.")
+                        self.exportProgressbar.grid_remove()
+                        if len(self.imgPath): self.playlistImgLabel.config(image=self.pic)
+                        self.exportWindow.update()
+                        return
+            trackDict = dict(searchRes.get("tracks"))
+            if trackDict.get("total") == 0:
+                self.exportProgressLabel.configure(text = f"Searching for {songTitle} by {songArtist}...")
+                if len(self.imgPath): self.playlistImgLabel.config(image=self.pic)
+                self.exportWindow.update()
                 try: searchRes = dict(self.sp.search(q = f"track:\"{songTitle}\" artist:\"{songArtist}\"", type="track", limit = 1))
                 except spotipy.exceptions.SpotifyException as e:
                     if e.http_status == 429:
@@ -199,10 +219,16 @@ class ExportWindow:
                         waitSec = waitTime % 60
                         self.exportProgressLabel.configure(text = f"Spotify rate limit reached. Please try again in {waitHr} hours, {waitMin} minutes and {waitSec} seconds.")
                         self.exportProgressbar.grid_remove()
-                        self.playlistImgLabel.config(image=self.pic)
+                        if len(self.imgPath): self.playlistImgLabel.config(image=self.pic)
                         self.exportWindow.update()
                         return
-            trackDict = dict(searchRes.get("tracks"))
+                trackDict = dict(searchRes.get("tracks"))
+                if trackDict.get("total") == 0:
+                    self.exportProgressLabel.configure(text = f"Spotify search failed on {songTitle} by {songArtist}. This shouldn't happen!")
+                    self.exportProgressbar.grid_remove()
+                    if len(self.imgPath): self.playlistImgLabel.config(image=self.pic)
+                    self.exportWindow.update()
+                    return
             itemsDict = dict(trackDict.get("items")[0])
             itemID = itemsDict.get("uri")
             self.itemsToAdd.append(itemID)
@@ -213,7 +239,7 @@ class ExportWindow:
             self.exportWindow.after(ms = 750, func = self.addSong)
         else:
             self.exportProgressLabel.configure(text = "Creating playlist...")
-            self.playlistImgLabel.config(image=self.pic)
+            if len(self.imgPath): self.playlistImgLabel.config(image=self.pic)
             self.exportWindow.update()
             if self.playlistNewVar.get():
                 newDesc = str(self.playlistDescText.get("1.0", "end")).replace("\n", "")
@@ -225,13 +251,14 @@ class ExportWindow:
                 self.playlist_url = self.sp.current_user_playlists(limit=1)["items"][0]["external_urls"]["spotify"]
             else:
                 self.playlist_url = self.playlistURLVar.get().split("?", maxsplit=1)[0]
-            try: 
-                self.sp.playlist_upload_cover_image(playlist_id=self.playlist_url, image_b64=self.encodedImgString)
-            except:
-                self.exportProgressLabel.configure(text = "Error updating playlist image! Skipping...")
-                self.exportProgressbar.grid_remove()
-                self.exportWindow.update()
-                self.exportWindow.after(1500)
+            if len(self.imgPath):
+                try: 
+                    self.sp.playlist_upload_cover_image(playlist_id=self.playlist_url, image_b64=self.encodedImgString)
+                except:
+                    self.exportProgressLabel.configure(text = "Error updating playlist image! Skipping...")
+                    self.exportProgressbar.grid_remove()
+                    self.exportWindow.update()
+                    self.exportWindow.after(1500)
             self.exportProgressLabel.configure(text = "Almost done! Adding songs to playlist...")
             self.exportWindow.update()
             self.exportWindow.after(ms = 2000, func = self.addItems)

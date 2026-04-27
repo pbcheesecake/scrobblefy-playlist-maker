@@ -53,6 +53,7 @@ class FuncMenu:
     def addSongToLists(self, song: TopItem, songList: list[str], listens: bool):
         formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)}")
         songAlbum = song[0].get_album()
+        #TODO: fork/hijack pylast to get more info from the track requests x.x
         if songAlbum:
             songAlbum = str(songAlbum)
             songAlbum = songAlbum.split(" - ", 1)[1].replace(" [Explicit]", "")
@@ -119,9 +120,9 @@ class FuncMenu:
         self.allSongList.clear()
         self.weightedList.clear()
         if self.songCountVar.get() == 0:
-            recents = self.user.get_recent_tracks()
+            recents = self.user.get_recent_tracks(now_playing=True)
         else:
-            recents=self.user.get_recent_tracks(self.songCountVar.get())
+            recents=self.user.get_recent_tracks(limit = self.songCountVar.get(), now_playing=True)
         self.clearSongs()
         for song in recents:
             self.addSongToLists(song, songList, False)
