@@ -21,7 +21,7 @@ class ExportWindow:
         self.playlistVisVar = BooleanVar(value=False)
         self.playlistNewVar = BooleanVar(value=True)
         self.playlistURLVar = StringVar()
-        self.imgPath: str
+        self.imgPath: str = ""
         self.encodedImgString: str
         self.pic: ImageTk.PhotoImage
 
@@ -129,21 +129,22 @@ class ExportWindow:
         #print(self.songList)
         self.iterator = 0
         self.itemsToAdd = []
-        try: self.encodeImage()
-        except:
-            self.exportProgressLabel.configure(text = "Image format not accepted. Please pick a different one and try again.")
-            self.exportWindow.update()
-            return
+        if self.playlistNewVar.get():
+            try: self.encodeImage()
+            except:
+                self.exportProgressLabel.configure(text = "Image format not accepted. Please pick a different one and try again.")
+                self.exportWindow.update()
+                return
         self.exportProgressLabel.grid(column = 0, row = 0, pady = 5, sticky = EW)
-        if self.playlistNameVar.get() == "":
+        if self.playlistNewVar.get() and self.playlistNameVar.get() == "":
             self.exportProgressLabel.configure(text = "Please add a name for your playlist before continuing!")
             self.exportWindow.update()
             return
         self.exportProgressbar.grid(column = 0, row = 1, pady = 5, sticky = EW)
         self.addSong()
-        
 
     def renderNew(self):
+        self.playlistNewVar.set(True)
         self.playlistURLLabel.grid_remove()
         self.playlistURLInput.grid_remove()
 
@@ -161,6 +162,7 @@ class ExportWindow:
         self.playlistImgAddButton.grid()
 
     def renderPrev(self):
+        self.playlistNewVar.set(False)
         self.playlistNewNameLabel.grid_remove()
         self.playlistNewNameInput.grid_remove()
         self.playlistDescLabel.grid_remove()
@@ -210,7 +212,7 @@ class ExportWindow:
             self.exportWindow.after(ms = 750, func = self.addSong)
         else:
             self.exportProgressLabel.configure(text = "Creating playlist...")
-            self.playlistImgLabel.config(image=self.pic)
+            if self.playlistNewVar.get(): self.playlistImgLabel.config(image=self.pic)
             self.exportWindow.update()
             if self.playlistNewVar.get():
                 newDesc = str(self.playlistDescText.get("1.0", "end")).replace("\n", "")
@@ -220,15 +222,15 @@ class ExportWindow:
                 else:
                     self.sp.current_user_playlist_create(name=self.playlistNameVar.get(), public=self.playlistVisVar.get(), description=newDesc)
                 self.playlist_url = self.sp.current_user_playlists(limit=1)["items"][0]["external_urls"]["spotify"]
+                try: 
+                    self.sp.playlist_upload_cover_image(playlist_id=self.playlist_url, image_b64=self.encodedImgString)
+                except:
+                    self.exportProgressLabel.configure(text = "Error updating playlist image! Skipping...")
+                    self.exportProgressbar.grid_remove()
+                    self.exportWindow.update()
+                    self.exportWindow.after(1500)
             else:
                 self.playlist_url = self.playlistURLVar.get().split("?", maxsplit=1)[0]
-            try: 
-                self.sp.playlist_upload_cover_image(playlist_id=self.playlist_url, image_b64=self.encodedImgString)
-            except:
-                self.exportProgressLabel.configure(text = "Error updating playlist image! Skipping...")
-                self.exportProgressbar.grid_remove()
-                self.exportWindow.update()
-                self.exportWindow.after(1500)
             self.exportProgressLabel.configure(text = "Almost done! Adding songs to playlist...")
             self.exportWindow.update()
             self.exportWindow.after(ms = 2000, func = self.addItems)
