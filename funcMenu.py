@@ -62,7 +62,7 @@ class FuncMenu:
             tops = self.user.get_top_tracks(period = self.timeframeVar.get(), limit = self.songCountVar.get())
         self.clearSongs()
         for song in tops:
-            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+            formattedSong = str(song[0]).replace(" - ", ": ", 1)
             songList.append(formattedSong+": "+str(song[1])+" listens")
             self.allSongList.append(song)
             self.weightedList.append(song)
@@ -86,10 +86,7 @@ class FuncMenu:
                         tops.pop()
                 self.clearSongs()
                 for song in tops:
-                    #TODO: account for when album is None, otherwise only show album title
-                    # also make sorting work with album titles
-                    # also uhhhhh you're cool haha
-                    formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+                    formattedSong = str(song[0]).replace(" - ", ": ", 1)
                     songList.append(formattedSong+": "+str(song[1])+" listens")
                     self.allSongList.append(song)
                     self.weightedList.append(song)
@@ -114,7 +111,7 @@ class FuncMenu:
             recents=self.user.get_recent_tracks(self.songCountVar.get())
         self.clearSongs()
         for song in recents:
-            formattedSong = (f"{str(song[0]).replace(" - ", ": ", 1)} [{str(song[0].get_album())}]")
+            formattedSong = str(song[0]).replace(" - ", ": ", 1)
             songList.append(formattedSong)
             topItemSong = TopItem(song.track, 1)
             self.allSongList.append(topItemSong)
