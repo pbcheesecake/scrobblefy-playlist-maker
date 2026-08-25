@@ -3,6 +3,7 @@ import spotipy
 from tkinter import *
 from tkinter.ttk import *
 from ttkbootstrap import *
+from ttkbootstrap.widgets.tableview import *
 from ttkbootstrap.constants import *
 from pylast import PlayedTrack, TopItem, User
 from funcMenu import FuncMenu
@@ -11,32 +12,6 @@ import os
 
 class MainWindow:
     #functions
-    ##old funcs
-    def printTracks(self, tracks: list[PlayedTrack] | list[TopItem], lim: int | None = None):
-        if isinstance(tracks[0], PlayedTrack):
-            self.printRecents(tracks)
-        else:
-            if lim == None:
-                self.printTops(tracks)
-            else:
-                self.printTops(tracks, lim)
-
-    def printRecents(self, tracks: list[PlayedTrack]):
-        for i in enumerate(tracks):
-            print(i[1][0])
-            self.allSongList.append(i[1][0])
-        self.allSongListVar.set(self.allSongList)
-
-    def printTops(self, tracks: list[PlayedTrack], lim: int | None = None):
-        if lim == None:
-            for i in enumerate(tracks):
-                print(str(i[1][0]) + ": " + str(i[1][1]) + " listens")
-        else:
-            i = 0
-            while i < lim and i < len(tracks):
-                print(str(tracks[i][0]) + ": " + str(tracks[i][1]) + " listens")
-                i+=1
-
     ##button onpress funcs
     def topDefault(self):
         if(self.topDefaultMenu.grid_info()):
@@ -60,120 +35,39 @@ class MainWindow:
             self.recentSongsMenu.grid(column = 0, row = 5, sticky = EW, pady=10)
 
     def clearSongs(self):
-        self.allSongListVar.set([])
-        self.playlistListVar.set([])
+        self.allSongTable.build_table_data(coldata=[
+                            {"text": "Title", "width": "400", "stretch": True}, 
+                            {"text": "Artist", "width": "300", "stretch": True}, 
+                            {"text": "Listens", "width": "100", "stretch": True}
+                            ], 
+                        rowdata=[])
+        self.playlistTable.build_table_data(coldata=[
+                            {"text": "Title", "width": "400", "stretch": True}, 
+                            {"text": "Artist", "width": "300", "stretch": True}, 
+                            {"text": "Listens", "width": "100", "stretch": True}
+                            ], 
+                        rowdata=[])
 
     def addSongs(self):
-        plLVTemp = []
-        songIndices = self.allSongListbox.curselection()
-        for songInd in songIndices:
-            if self.allSongList[songInd] in self.playlistList and not self.dupeCheck:
-                self.openDupes()
-            if self.allSongList[songInd] in self.playlistList and self.allowDupes.get():
-                self.playlistList.append(self.allSongList[songInd])
-            if self.allSongList[songInd] not in self.playlistList:
-                self.playlistList.append(self.allSongList[songInd])
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
-        self.playlistListVar.set(plLVTemp)
-
-    def removeSongs(self):
-        plLVTemp = []
-        songIndices = list(self.playlistListbox.curselection())
-        songIndices.reverse()
-        for songInd in songIndices:
-            self.playlistList.pop(songInd)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
-        self.playlistListVar.set(plLVTemp)
-        self.playlistListbox.select_clear(0, len(self.playlistList))
-
-    def moveSongsUp(self):
-        plLVTemp = []
-        newCursorList = []
-        offset = False
-        songIndices = list(self.playlistListbox.curselection())
-        for songInd in songIndices:
-            idxTarget = songInd - 1
-            if offset:
-                pass
-            elif idxTarget == -1:
-                idxTarget = len(self.playlistList) - 1
-                self.playlistList = list(self.playlistList[1:] + [self.playlistList[songInd]])
-                offset = True
-            else:
-                self.playlistList[songInd], self.playlistList[idxTarget] = self.playlistList[idxTarget], self.playlistList[songInd]
-            newCursorList.append(idxTarget)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
-        self.playlistListVar.set(plLVTemp)
-        self.playlistListbox.select_clear(0, len(self.playlistList))
-        for target in newCursorList:
-            self.playlistListbox.select_set(target)
-    
-    def moveSongsDown(self):
-        plLVTemp = []
-        newCursorList = []
-        offset = False
-        songIndices = list(self.playlistListbox.curselection())
-        songIndices.reverse()
-        for songInd in songIndices:
-            idxTarget = songInd + 1
-            if offset:
-                pass
-            elif idxTarget == len(self.playlistList):
-                idxTarget = 0
-                self.playlistList = list([self.playlistList[songInd]] + self.playlistList[:-1])
-                offset = True
-            else:
-                self.playlistList[songInd], self.playlistList[idxTarget] = self.playlistList[idxTarget], self.playlistList[songInd]
-            newCursorList.append(idxTarget)
-        for song in self.playlistList:
-            plLVTemp.append(song.item)
-        self.playlistListVar.set(plLVTemp)
-        self.playlistListbox.select_clear(0, len(self.playlistList))
-        for target in newCursorList:
-            self.playlistListbox.select_set(target)
-
-    def sortSongsAlphTitle(self, list: list[TopItem], type: str):
-        tempList = []
-        if sorted(list, key=lambda song : song.item.title.lower()) == list:
-            list.sort(key=lambda song : song.item.title.lower(), reverse=True)
-        else: list.sort(key=lambda song : song.item.title.lower())
-        for song in list:
-            tempList.append(str(song.item))
-        if type == "allSongList":
-            self.allSongListVar.set(tempList)
-            self.allSongListbox.select_clear(0, len(self.allSongList))
-        elif type == "playlistList":
-            self.playlistListVar.set(tempList)
-            self.playlistListbox.select_clear(0, len(self.playlistList))
-
-    def sortSongsAlphArtist(self, list: list[TopItem], type: str):
-        tempList = []
-        if sorted(list, key=lambda song : str(song.item.artist).lower()) == list:
-            list.sort(key=lambda song : str(song.item.artist).lower(), reverse=True)
-        else: list.sort(key=lambda song : str(song.item.artist).lower())
-        for song in list:
-            tempList.append(str(song.item))
-        if type == "allSongList":
-            self.allSongListVar.set(tempList)
-            self.allSongListbox.select_clear(0, len(self.allSongList))
-        elif type == "playlistList":
-            self.playlistListVar.set(tempList)
-            self.playlistListbox.select_clear(0, len(self.playlistList))
-
-    def weightedSort(self):
-        tempList = []
-        if self.allSongList == self.weightedList: self.allSongList.reverse()
-        else: 
-            self.allSongList.clear()
-            for song in self.weightedList:
-                self.allSongList.append(song)
-        for song in self.allSongList:
-            tempList.append(str(song[0])+": "+str(song[1])+" listens")
-        self.allSongListVar.set(tempList)
-        self.allSongListbox.select_clear(0, len(self.allSongList))
+        playlistSongs = []
+        for song in self.playlistTable.get_rows():
+            playlistSongs.append(song.values)
+        songsToAdd = self.allSongTable.get_rows(selected=True)
+        for song in songsToAdd:
+            added = False
+            toAdd = True
+            for targets in self.playlistTable.get_rows():
+                if song.values == targets.values and not self.dupeCheck:
+                    self.openDupes()
+                if song.values == targets.values and not added:
+                    if self.allowDupes.get():
+                        playlistSongs.append(list(song.values))
+                        added = True
+                    else:
+                        toAdd = False
+            if not added and toAdd:
+                playlistSongs.append(list(song.values))
+        self.buildPlaylistTable(playlistSongs)
     
     def getList(self):
         print(self.allSongList)
@@ -196,9 +90,7 @@ class MainWindow:
     def deactivateButtons(self):
         for but in self.funcButtons:
             but.state(['disabled'])
-        for but in self.playlistButtons:
-            but.state(['disabled'])
-        for but in self.songListButtons:
+        for but in self.optionButtons:
             but.state(['disabled'])
         for but in self.programButtons:
             but.state(['disabled'])
@@ -225,42 +117,32 @@ class MainWindow:
             self.forgetAllFuncs()
             for but in self.funcButtons:
                 but.state(['!disabled'])
-            self.activateSongButtons()
-            self.activatePlaylistButtons()
-            self.activateProgramButtons()
+            self.activateOptionButtons()
             self.topDefaultTimeframeConstructor()
             self.topTimeframeConstructor()
             self.recentSongsConstructor()
         except TclError as e:
             print(f"window die: {e}")
 
-    def activateSongButtons(self):
-        for but in self.songListButtons:
-            but.state(['!disabled'])
-
-    def activatePlaylistButtons(self):
-        for but in self.playlistButtons:
+    def activateOptionButtons(self):
+        for but in self.optionButtons:
             but.state(['!disabled'])
         self.dupeCheckbox.state(['!disabled'])
-
-    def activateProgramButtons(self):
-        for but in self.programButtons:
-            but.state(['!disabled'])
 
     ##func menu constructors
     def topDefaultTimeframeConstructor(self):
         if self.tdtMenu == None:
-            self.tdtMenu = FuncMenu(self.topDefaultMenu, self.root, self.user, "topDefaultTimeframe", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongListVar, self.weightedList)
+            self.tdtMenu = FuncMenu(self.topDefaultMenu, self.root, self.user, "topDefaultTimeframe", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongTable)
             self.tdtMenu.setup()
 
     def topTimeframeConstructor(self):
         if self.tfMenu == None:
-            self.tfMenu = FuncMenu(self.topTimeframeMenu, self.root, self.user, "topCustomTimeframe", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongListVar, self.weightedList)
+            self.tfMenu = FuncMenu(self.topTimeframeMenu, self.root, self.user, "topCustomTimeframe", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongTable)
             self.tfMenu.setup()
 
     def recentSongsConstructor(self):
         if self.rsMenu == None:
-            self.rsMenu = FuncMenu(self.recentSongsMenu, self.root, self.user, "recentSongs", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongListVar, self.weightedList)
+            self.rsMenu = FuncMenu(self.recentSongsMenu, self.root, self.user, "recentSongs", self.timeframeVar, self.songCountVar, self.allSongList, self.allSongTable)
             self.rsMenu.setup()
 
     ##window opener
@@ -271,7 +153,10 @@ class MainWindow:
             self.root.wait_window(self.loginWindow.loginWindow)
         elif winType == "export":
             from exportWindow import ExportWindow
-            self.exportWindow = ExportWindow(parent=self, songList=self.playlistListVar.get())
+            songList = []
+            for song in self.playlistTable.get_rows():
+                songList.append(list(song.values))
+            self.exportWindow = ExportWindow(parent=self, songList=songList)
             self.root.wait_window(self.exportWindow.exportWindow)
         elif winType == "dupeAsk":
             from dupeAskWindow import DupeAskWindow
@@ -285,6 +170,30 @@ class MainWindow:
         self.deactivateButtons()
         self.createWindow("login")
         self.activateUserButtons()
+
+    ##helper funcs
+    def setSelected(self, rows):
+        self.curselection = list(rows)
+
+    def createTable(self, dest: Frame):
+        return Tableview(dest, 
+            coldata=[
+                {"text": "Title", "width": "400", "stretch": True}, 
+                {"text": "Artist", "width": "300", "stretch": True}, 
+                {"text": "Listens", "width": "100", "stretch": True}
+                ], 
+            rowdata=[], 
+            bootstyle=PRIMARY,
+            height = 25,
+            on_select=self.setSelected)
+
+    def buildPlaylistTable(self, rowData: list[list[str]]):
+        self.playlistTable.build_table_data(coldata=[
+            {"text": "Title", "width": "400", "stretch": True}, 
+            {"text": "Artist", "width": "300", "stretch": True}, 
+            {"text": "Listens", "width": "100", "stretch": True}
+            ], 
+        rowdata=rowData)
 
     #the program
     def __init__(self, root: Window, sp: spotipy.Spotify | None, network: pylast.LastFMNetwork | None, user: pylast.User | None):
@@ -312,113 +221,86 @@ class MainWindow:
         
         self.allSongList = []
         self.allSongListVar = StringVar()
-        self.weightedList: list[TopItem] = []
         self.playlistList = []
         self.playlistListVar = StringVar()
-        self.songListButtons = []
-        self.playlistButtons = []
+        self.optionButtons = []
         self.programButtons = []
 
         baseFrame = Frame(self.root, padding = 10)
-        baseFrame.columnconfigure(0, weight=3)
+        baseFrame.columnconfigure(0, weight=5)
         baseFrame.columnconfigure(1, weight=1)
-        baseFrame.columnconfigure(2, weight=3)
+        baseFrame.columnconfigure(2, weight=5)
         baseFrame.rowconfigure(0, weight=1)
         baseFrame.rowconfigure(1, weight=1)
         baseFrame.grid(sticky=NSEW)
 
         leftColumn = Frame(baseFrame, padding = 10)
-        leftColumn.grid(row = 0, column = 0, sticky=NW)
+        leftColumn.grid(row = 0, column = 0, sticky=(N,EW))
         leftColumn.columnconfigure(0, weight=1)
-        leftColumn.columnconfigure(1, weight=1)
+        leftColumn.rowconfigure(0, weight=1)
         leftColumn.rowconfigure(1, weight=1)
+        leftColumn.rowconfigure(2, weight=1)
 
         buttonColumn = Frame(baseFrame, padding = 10)
         buttonColumn.grid(row = 0, column = 1, sticky = NS)
         buttonColumn.columnconfigure(0, weight=1)
         buttonColumn.rowconfigure(0, weight=1)
-        buttonColumn.rowconfigure(1, weight=1)
-        buttonColumn.rowconfigure(2, weight=1)
-        buttonColumn.rowconfigure(3, weight=8)
+        buttonColumn.rowconfigure(1, weight=4)
+        buttonColumn.rowconfigure(2, weight=5)
 
         rightColumn = Frame(baseFrame, padding = 10)
-        rightColumn.grid(row = 0, column = 2, sticky=NE)
+        rightColumn.grid(row = 0, column = 2, sticky=(N,EW))
         rightColumn.columnconfigure(0, weight=1)
         rightColumn.rowconfigure(0, weight=1)
+        rightColumn.rowconfigure(1, weight=1)
+        rightColumn.rowconfigure(2, weight=1)
 
         #left column
         allSongLabel = Label(leftColumn, text="Last.fm Results")
         allSongLabel.grid(column = 0, row = 0, sticky = NSEW)
-        self.allSongListbox = Listbox(leftColumn, listvariable=self.allSongListVar, width = 80, height = 25, selectmode = EXTENDED)
-        self.allSongListbox.grid(column = 0, row = 1, sticky = NSEW)
-        self.allSongListboxScrollbar = Scrollbar(leftColumn, orient=VERTICAL, command=self.allSongListbox.yview)
-        self.allSongListboxScrollbar.grid(column = 1, row = 1, sticky=NS)
-        self.allSongListbox.configure(yscrollcommand=self.allSongListboxScrollbar.set)
+        self.allSongTable = self.createTable(dest=leftColumn)
+        self.allSongTable.grid(column = 0, row = 1, sticky = NSEW)
 
-        #center column with buttons
-        songListButtonFrame = Labelframe(buttonColumn, text="Results List Options:")
-        songListButtonFrame.grid(sticky=(N,EW))
-        addSongsButton = Button(songListButtonFrame, text = "Add Song(s) to Playlist", command=self.addSongs, bootstyle="success")
-        self.songListButtons.append(addSongsButton)
-        sortSongsAlphTitleButton = Button(songListButtonFrame, text = "Sort Songs by Title", command=lambda: self.sortSongsAlphTitle(self.allSongList, "allSongList"))
-        self.songListButtons.append(sortSongsAlphTitleButton)
-        sortSongsAlphArtistButton = Button(songListButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.allSongList, "allSongList"))
-        self.songListButtons.append(sortSongsAlphArtistButton)
-        weightedSortButton = Button(songListButtonFrame, text = "Sort Songs by Listens", command=lambda: self.weightedSort())
-        self.songListButtons.append(weightedSortButton)
-        for but in self.songListButtons:
-            but.grid(sticky = NSEW, pady = 2)
-            but.state(['disabled'])
+        #center column with add button
+        addButtonFrame = Frame(buttonColumn)
+        addButtonFrame.grid(column = 0, row = 1, sticky = EW)
 
-        playlistButtonFrame = Labelframe(buttonColumn, text="Playlist Options:")
-        playlistButtonFrame.columnconfigure(0, weight=1)
-        playlistButtonFrame.columnconfigure(1, weight=1)
-        playlistButtonFrame.grid(column = 0, row = 1, sticky=(N,EW))
-        removeSongsButton = Button(playlistButtonFrame, text = "Remove Song(s) from Playlist", command=self.removeSongs, bootstyle="danger")
-        self.playlistButtons.append(removeSongsButton)
-        moveSongsUpButton = Button(playlistButtonFrame, text = "Move Song(s) Up", command=self.moveSongsUp, bootstyle="secondary")
-        self.playlistButtons.append(moveSongsUpButton)
-        moveSongsDownButton = Button(playlistButtonFrame, text = "Move Song(s) Down", command=self.moveSongsDown, bootstyle="secondary")
-        self.playlistButtons.append(moveSongsDownButton)
-        sortPlaylistAlphTitleButton = Button(playlistButtonFrame, text = "Sort Songs by Title", command=lambda: self.sortSongsAlphTitle(self.playlistList, "playlistList"))
-        self.playlistButtons.append(sortPlaylistAlphTitleButton)
-        sortPlaylistAlphArtistButton = Button(playlistButtonFrame, text = "Sort Songs by Artist", command=lambda: self.sortSongsAlphArtist(self.playlistList, "playlistList"))
-        self.playlistButtons.append(sortPlaylistAlphArtistButton)
-        #openDupesButton = Button(playlistButtonFrame, text = "Open Duplicate Option Menu", command=self.openDupes, bootstyle="warning") # turn this into a checkbox
-        #self.playlistButtons.append(openDupesButton)
-        dupeCheckboxLabel = Label(playlistButtonFrame, text = "Allow duplicates?")
-        self.dupeCheckbox = Checkbutton(playlistButtonFrame, variable=self.allowDupes, padding = 7)
-        dupeCheckboxLabel.grid(row = 5, column = 0, sticky = (E, NS), pady = 2)
-        self.dupeCheckbox.grid(row = 5, column = 1, sticky = (W, NS), pady = 2)
-        self.dupeCheckbox.state(['disabled'])
-        exportPlaylistButton = Button(playlistButtonFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, bootstyle="success")
-        self.playlistButtons.append(exportPlaylistButton)
-        for butTup in enumerate(self.playlistButtons):
-            but = butTup[1]
-            rowLoc = butTup[0]
-            if rowLoc > 4: rowLoc += 1
-            but.grid(column = 0, row = rowLoc, sticky=(N, EW), pady = 2, columnspan = 2)
-            but.state(['disabled'])
-        
-
-        programButtonFrame = Labelframe(buttonColumn, text = "Program Options")
-        programButtonFrame.grid(column = 0, row = 2, sticky = (N,EW))
-        backToLoginButton = Button(programButtonFrame, text = "Return to Login Screen", command=self.createLogin)
-        self.programButtons.append(backToLoginButton)
-        programHelpButton = Button(programButtonFrame, text = "Open Help Window", command=self.openHelp, bootstyle="warning")
-        self.programButtons.append(programHelpButton)
-        for but in self.programButtons:
-            but.grid(sticky = NSEW, pady = 2)
-            but.state(['disabled'])
+        addSongsButton = Button(addButtonFrame, text = "Add Song(s) to Playlist", command=self.addSongs, bootstyle="success")
+        self.optionButtons.append(addSongsButton)
+        addSongsButton.grid(sticky = NSEW, pady = 2)
+        addSongsButton.state(['disabled'])
 
         #right column
         playlistLabel = Label(rightColumn, text="Playlist")
         playlistLabel.grid(column = 0, row = 0, sticky = NSEW)
-        self.playlistListbox = Listbox(rightColumn, listvariable=self.playlistListVar, width = 80, height = 25, selectmode=EXTENDED)
-        self.playlistListbox.grid(column = 0, row = 1)
-        self.playlistListboxScrollbar = Scrollbar(rightColumn, orient=VERTICAL, command=self.playlistListbox.yview)
-        self.playlistListboxScrollbar.grid(column = 1, row = 1, sticky=NS)
-        self.playlistListbox.configure(yscrollcommand=self.playlistListboxScrollbar.set)
+        self.playlistTable = self.createTable(dest = rightColumn)
+        self.playlistTable.grid(column = 0, row = 1, sticky = NSEW)
+
+        optionsFrame = Frame(rightColumn)
+        optionsFrame.rowconfigure(0, weight = 1)
+        optionsFrame.rowconfigure(1, weight = 1)
+        optionsFrame.rowconfigure(2, weight = 1)
+        optionsFrame.columnconfigure(0, weight = 1)
+        optionsFrame.columnconfigure(1, weight = 3)
+        optionsFrame.grid(column = 0, row = 2, sticky = NSEW)
+        dupeFrame = Frame(optionsFrame)
+        dupeFrame.grid(row = 0, column = 0, sticky = W)
+        dupeCheckboxLabel = Label(dupeFrame, text = "Allow duplicates?")
+        self.dupeCheckbox = Checkbutton(dupeFrame, variable=self.allowDupes, padding = 7)
+        dupeCheckboxLabel.grid(row = 0, column = 0, sticky = (E, NS), pady = 2)
+        self.dupeCheckbox.grid(row = 0, column = 1, sticky = (W, NS), pady = 2)
+        self.dupeCheckbox.state(['disabled'])
+        exportPlaylistButton = Button(optionsFrame, text = "Export Playlist to Spotify", command=self.exportPlaylist, bootstyle="success")
+        exportPlaylistButton.grid(row = 0, column = 1, sticky = EW, pady = 20)
+        self.optionButtons.append(exportPlaylistButton)
+        backToLoginButton = Button(optionsFrame, text = "Return to Login Screen", command=self.createLogin)
+        backToLoginButton.grid(row = 1, column = 0, columnspan=2, sticky = EW)
+        self.optionButtons.append(backToLoginButton)
+        programHelpButton = Button(optionsFrame, text = "Open Help Window", command=self.openHelp, bootstyle="warning")
+        programHelpButton.grid(row = 2, column = 0, columnspan=2, sticky = EW)
+        self.optionButtons.append(programHelpButton)
+        for but in self.optionButtons:
+            but.state(['disabled'])
 
         #last.fm functions
         funcFrame = Labelframe(leftColumn, padding=10, text = "Last.fm Options")

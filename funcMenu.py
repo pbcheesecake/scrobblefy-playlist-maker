@@ -1,12 +1,13 @@
 from pylast import TopItem, User, WSError
 from ttkbootstrap import *
+from ttkbootstrap.widgets.tableview import *
 from ttkbootstrap.constants import *
 import re
 import time
 import datetime
 
 class FuncMenu:
-    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[TopItem], allSongListVar: StringVar, weightedList: list[TopItem]):
+    def __init__(self, parent: Frame, root: Tk, user: User, menu: str, timeframeVar: StringVar, songCountVar: int | None, allSongList: list[TopItem], allSongTable: Tableview,): #allSongListVar: StringVar, weightedList: list[TopItem]):
         self.parent = parent
         self.root = root
         self.user = user
@@ -14,8 +15,7 @@ class FuncMenu:
         self.timeframeVar = timeframeVar
         self.songCountVar = songCountVar
         self.allSongList = allSongList
-        self.allSongListVar = allSongListVar
-        self.weightedList = weightedList
+        self.allSongTable = allSongTable
         formattedStartTime = time.strftime('%m/%d/%Y', time.gmtime(int(self.user.get_registered())))
         formattedEndTime = time.strftime('%m/%d/%Y', time.gmtime(time.time()))
         timeStartList = formattedStartTime.split("/")
@@ -44,35 +44,37 @@ class FuncMenu:
                 return int(res)
         return 0
     
-    def clearSongs(self):
-        self.allSongListVar.set([])
+    def buildTable(self, rowData: list[list[str]]):
+        self.allSongTable.build_table_data(coldata=[
+                            {"text": "Title", "width": "400", "stretch": True}, 
+                            {"text": "Artist", "width": "300", "stretch": True}, 
+                            {"text": "Listens", "width": "100", "stretch": True}
+                            ], 
+                        rowdata=rowData)
+        self.root.update()
 
     def parseTime(self, date: datetime):
         return int(datetime.datetime.timestamp(date))
     
     def getTops(self, event):
         #default options: overall, 7day, 1month, 3month, 6month, 12month
-        songList = []
         self.allSongList.clear()
-        self.weightedList.clear()
+        songList = []
         if self.songCountVar.get() == 0:
             tops = self.user.get_top_tracks(period = self.timeframeVar.get())
         else:
             self.songCountVar.set(self.removeLeadingZeros(self.songCountVar.get()))
             tops = self.user.get_top_tracks(period = self.timeframeVar.get(), limit = self.songCountVar.get())
-        self.clearSongs()
         for song in tops:
-            formattedSong = str(song[0]).replace(" - ", ": ", 1)
-            songList.append(formattedSong+": "+str(song[1])+" listens")
+            songArtist, songTitle = str(song[0]).split(" - ", 1)
+            songListens = int(song[1])
             self.allSongList.append(song)
-            self.weightedList.append(song)
-        self.allSongListVar.set(songList)
+            songList.append([songTitle, songArtist, songListens])
+        self.buildTable(songList)
 
     def getTopsFromDates(self, event):
         self.dateErrorLabel.grid_remove()
-        songList = []
         self.allSongList.clear()
-        self.weightedList.clear()
         try:
             startTime = self.parseTime(self.startDateSelector.get_date())
             endTime = self.parseTime(self.endDateSelector.get_date())
@@ -86,11 +88,11 @@ class FuncMenu:
                         tops.pop()
                 self.clearSongs()
                 for song in tops:
-                    formattedSong = str(song[0]).replace(" - ", ": ", 1)
-                    songList.append(formattedSong+": "+str(song[1])+" listens")
+                    songArtist, songTitle = str(song[0]).split(" - ", 1)
+                    songListens = int(song[1])
                     self.allSongList.append(song)
-                    self.weightedList.append(song)
-                self.allSongListVar.set(songList)
+                    self.allSongTable.insert_row(values=[songTitle, songArtist, songListens], reload = False)
+                self.allSongTable.load_table_data()
                 self.dateErrorLabel.grid_forget()
             else:
                 raise ValueError
@@ -104,19 +106,18 @@ class FuncMenu:
     def getRecents(self, event):
         songList = []
         self.allSongList.clear()
-        self.weightedList.clear()
         if self.songCountVar.get() == 0:
             recents = self.user.get_recent_tracks()
         else:
             recents=self.user.get_recent_tracks(self.songCountVar.get())
         self.clearSongs()
         for song in recents:
-            formattedSong = str(song[0]).replace(" - ", ": ", 1)
-            songList.append(formattedSong)
-            topItemSong = TopItem(song.track, 1)
+            songArtist, songTitle = str(song[0]).split(" - ", 1)
+            songListens = 0
+            topItemSong = TopItem(song.track, 0)
             self.allSongList.append(topItemSong)
-            self.weightedList.append(topItemSong)
-        self.allSongListVar.set(songList)
+            self.allSongTable.insert_row(values=[songTitle, songArtist, songListens], reload = False)
+        self.allSongTable.load_table_data()
         
     def setup(self):
         check_num_wrapper = (self.root.register(self.check_num), '%P')

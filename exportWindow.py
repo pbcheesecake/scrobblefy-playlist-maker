@@ -12,11 +12,11 @@ from PIL import Image, ImageTk
 import base64
 
 class ExportWindow:
-    def __init__(self, songList: str, parent):
+    def __init__(self, songList: list[list[str]], parent):
         self.root: Tk = parent.root
         self.sp: spotipy.Spotify = parent.sp
 
-        self.songList = re.split("',|\",", songList)
+        self.songList = songList
         self.playlistNameVar = StringVar()
         self.playlistVisVar = BooleanVar(value=False)
         self.playlistNewVar = BooleanVar(value=True)
@@ -181,32 +181,28 @@ class ExportWindow:
 
     def addSong(self):
         song = self.songList[self.iterator]
-        formattedSong = song[2:]
-        if self.iterator == len(self.songList) - 1:
-            formattedSong = formattedSong[:-2]
-        if len(formattedSong)>2:
-            songArtist, songTitle = formattedSong.split(" - ", maxsplit = 1)
-            self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")
-            errOutput = io.StringIO()
-            with redirect_stderr(errOutput):
-                try: searchRes = dict(self.sp.search(q = f"track:\"{songTitle}\" artist:\"{songArtist}\"", type="track", limit = 1))
-                except spotipy.exceptions.SpotifyException as e:
-                    if e.http_status == 429:
-                        waitTime = int(errOutput.getvalue().replace("Your application has reached a rate/request limit. Retry will occur after: ", "").split()[0])
-                        waitHr = waitTime // 3600
-                        waitMin = waitTime % 3600 // 60
-                        waitSec = waitTime % 60
-                        self.exportProgressLabel.configure(text = f"Spotify rate limit reached. Please try again in {waitHr} hours, {waitMin} minutes and {waitSec} seconds.")
-                        self.exportProgressbar.grid_remove()
-                        self.playlistImgLabel.config(image=self.pic)
-                        self.exportWindow.update()
-                        return
-            trackDict = dict(searchRes.get("tracks"))
-            itemsDict = dict(trackDict.get("items")[0])
-            itemID = itemsDict.get("uri")
-            self.itemsToAdd.append(itemID)
-            self.exportProgressbar.step()
-            self.exportWindow.update()
+        songArtist, songTitle = song[1], song[0]
+        self.exportProgressLabel.configure(text = f"Finding {songTitle} by {songArtist}...")
+        errOutput = io.StringIO()
+        with redirect_stderr(errOutput):
+            try: searchRes = dict(self.sp.search(q = f"track:\"{songTitle}\" artist:\"{songArtist}\"", type="track", limit = 1))
+            except spotipy.exceptions.SpotifyException as e:
+                if e.http_status == 429:
+                    waitTime = int(errOutput.getvalue().replace("Your application has reached a rate/request limit. Retry will occur after: ", "").split()[0])
+                    waitHr = waitTime // 3600
+                    waitMin = waitTime % 3600 // 60
+                    waitSec = waitTime % 60
+                    self.exportProgressLabel.configure(text = f"Spotify rate limit reached. Please try again in {waitHr} hours, {waitMin} minutes and {waitSec} seconds.")
+                    self.exportProgressbar.grid_remove()
+                    self.playlistImgLabel.config(image=self.pic)
+                    self.exportWindow.update()
+                    return
+        trackDict = dict(searchRes.get("tracks"))
+        itemsDict = dict(trackDict.get("items")[0])
+        itemID = itemsDict.get("uri")
+        self.itemsToAdd.append(itemID)
+        self.exportProgressbar.step()
+        self.exportWindow.update()
         self.iterator += 1
         if self.iterator < len(self.songList):
             self.exportWindow.after(ms = 750, func = self.addSong)
